@@ -11,7 +11,7 @@ Backend API for SafetyNet Alerts application, developed as part of the OpenClass
     - [/persons](#persons)
     - [/firestations](#firestations)
     - [/medicalrecords](#medicalrecords)
-    - [/addresses](#addresses)
+    - [/addresses](#addresses) 
 ## Description
 
 **SafetyNetAPI** is a REST API implemented with Spring Boot, designed to provide emergency services with relevant information about individuals in distress and their locations.
