@@ -1,7 +1,17 @@
+# Ignore HELP.md file (usually a helper file, not needed in repo)
 HELP.md
+
+# Ignore the root target directory (Maven build output)
 target/
+/bin/
+
+# Do NOT ignore the Maven wrapper jar file (required for reproducible builds)
 !.mvn/wrapper/maven-wrapper.jar
+
+# Do NOT ignore target directories inside src/main folders (e.g., in modules)
 !**/src/main/**/target/
+
+# Do NOT ignore target directories inside src/test folders (e.g., in modules)
 !**/src/test/**/target/
 
 ### STS ###
@@ -14,10 +24,11 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
+out/
 
 ### NetBeans ###
 /nbproject/private/
@@ -31,3 +42,22 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Mac OS ###
+.DS_Store
+AppleDouble
+
+# System files
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# Backup and swap files
+*.bak
+*.orig
