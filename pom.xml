@@ -30,32 +30,118 @@
     </scm>
     <properties>
         <java.version>21</java.version>
+        <jacoco.version>0.8.12</jacoco.version> <!-- set the version of jacoco -->
+        <log4j.version>2.24.3</log4j.version>  <!-- set the version of log4j -->
     </properties>
     <dependencies>
-       <!-- Provides the necessary components to build web applications using Spring MVC.
-     Includes an embedded Tomcat server, Jackson for JSON processing, and a logging framework. -->
-		<dependency>
+        <!-- Log4j API for logging management -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <!-- Log4j Core for actual log management implementations -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <!-- Provides the necessary components to build web applications using Spring MVC.
+      Includes an embedded Tomcat server, Jackson for JSON processing, and a logging framework. -->
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-		<!-- Provides testing libraries for unit and integration testing:
+        <!-- Provides testing libraries for unit and integration testing:
      JUnit, Mockito, Spring Test, AssertJ, and more. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Lombok (compile-time annotations) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-			<!-- Enables building, packaging, and running the application with Maven.
-      Supports commands like 'mvn spring-boot:run' and 'mvn package'. -->
+            <!-- Configure the Maven Compiler Plugin to enable Lombok annotation processing,
+     so that Lombok can generate code (getters, setters, constructors, etc.) during compilation -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <!-- Enables building, packaging, and running the application with Maven.
+     Supports commands like 'mvn spring-boot:run' and 'mvn package'.
+     Lombok is excluded from the final packaged artifact since it is only needed at compile time. -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <!-- Maven Surefire Plugin configuration for running tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.21.0</version>
+            </plugin>
+            <!-- Jacoco for code coverage during tests.
+             Generates an HTML report at: target/site/jacoco/index.html -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
+    <!--
+     Generates an HTML report of unit test results during the 'site' phase.
+     The report will be available at: target/site/surefire-report.html
+     This plugin complements the raw test result files (.xml/.txt) generated by the maven-surefire-plugin.
+    -->
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+        </plugins>
+    </reporting>
 
 </project>
