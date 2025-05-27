@@ -30,6 +30,7 @@
     </scm>
     <properties>
         <java.version>21</java.version>
+        <jacoco.version>0.8.12</jacoco.version> <!-- set the version of jacoco -->
     </properties>
     <dependencies>
         <!-- Provides the necessary components to build web applications using Spring MVC.
@@ -84,6 +85,28 @@
                         </exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+            <!-- Jacoco for code coverage during tests.
+             Generates an HTML report at: target/site/jacoco/index.html -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
