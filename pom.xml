@@ -32,28 +32,58 @@
         <java.version>21</java.version>
     </properties>
     <dependencies>
-       <!-- Provides the necessary components to build web applications using Spring MVC.
-     Includes an embedded Tomcat server, Jackson for JSON processing, and a logging framework. -->
-		<dependency>
+        <!-- Provides the necessary components to build web applications using Spring MVC.
+      Includes an embedded Tomcat server, Jackson for JSON processing, and a logging framework. -->
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-		<!-- Provides testing libraries for unit and integration testing:
+        <!-- Provides testing libraries for unit and integration testing:
      JUnit, Mockito, Spring Test, AssertJ, and more. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Lombok (compile-time annotations) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-			<!-- Enables building, packaging, and running the application with Maven.
-      Supports commands like 'mvn spring-boot:run' and 'mvn package'. -->
+            <!-- Configure the Maven Compiler Plugin to enable Lombok annotation processing,
+     so that Lombok can generate code (getters, setters, constructors, etc.) during compilation -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <!-- Enables building, packaging, and running the application with Maven.
+     Supports commands like 'mvn spring-boot:run' and 'mvn package'.
+     Lombok is excluded from the final packaged artifact since it is only needed at compile time. -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
