@@ -1,10 +1,9 @@
-package com.openclassrooms.safetynet.SafetyNetAPI.Util;
+package com.openclassrooms.safetynet.safetynetapi.repository;
 
-import com.openclassrooms.safetynet.SafetyNetAPI.SafetyNetApiApplication;
+import com.openclassrooms.safetynet.safetynetapi.SafetyNetApiApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
