@@ -1,4 +1,4 @@
-package com.openclassrooms.safetynet.SafetyNetAPI.Model;
+package com.openclassrooms.safetynet.safetynetapi.model;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;

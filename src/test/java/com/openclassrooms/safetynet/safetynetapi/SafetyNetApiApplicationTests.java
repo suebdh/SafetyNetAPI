@@ -1,4 +1,4 @@
-package com.openclassrooms.safetynet.SafetyNetAPI;
+package com.openclassrooms.safetynet.safetynetapi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

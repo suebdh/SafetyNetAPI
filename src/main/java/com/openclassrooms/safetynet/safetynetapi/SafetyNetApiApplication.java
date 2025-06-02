@@ -1,4 +1,4 @@
-package com.openclassrooms.safetynet.SafetyNetAPI;
+package com.openclassrooms.safetynet.safetynetapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

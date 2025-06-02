@@ -1,9 +1,8 @@
-package com.openclassrooms.safetynet.SafetyNetAPI.Util;
+package com.openclassrooms.safetynet.safetynetapi.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.openclassrooms.safetynet.SafetyNetAPI.Model.DataFile;
+import com.openclassrooms.safetynet.safetynetapi.model.DataFile;
 import jakarta.annotation.PostConstruct;
-import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
