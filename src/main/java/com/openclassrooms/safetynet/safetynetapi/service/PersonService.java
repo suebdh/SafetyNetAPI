@@ -17,5 +17,25 @@ public class PersonService {
         return personRepository.findAll();
     }
 
-    // TODO: Implement other methods like save, update, delete later
+    public Person save(Person person) {
+        return personRepository.save(person);
+    }
+
+    public Person update(Person person) {
+        return personRepository.update(person);
+    }
+
+    public void delete(String firstName, String lastName) {
+        personRepository.delete(firstName, lastName);
+    }
+
+    public Person findByFirstNameAndLastName(String firstName, String lastName) {
+        return personRepository.findByFirstNameAndLastName(firstName, lastName);
+    }
+
+    public void deleteFirstOccurrence(String firstName, String lastName) {
+        personRepository.deleteFirstOccurrence(firstName, lastName);
+    }
+
+
 }
