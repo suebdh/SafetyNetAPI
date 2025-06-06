@@ -2,6 +2,7 @@ package com.openclassrooms.safetynet.safetynetapi.repository;
 
 import com.openclassrooms.safetynet.safetynetapi.model.Person;
 import jakarta.annotation.PostConstruct;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -14,6 +15,7 @@ public class InMemoryPersonRepository implements PersonRepository {
     @Autowired
     private DataLoader dataLoader;
 
+    @Setter
     private List<Person> persons;
 
     //Initialize a mutable list named persons
@@ -48,7 +50,7 @@ public class InMemoryPersonRepository implements PersonRepository {
         return null; // if Person not found
 
     }
-
+    //removeIf removes ALL people who match this first name and last name
     @Override
     public void delete(String firstName, String lastName) {
         persons.removeIf(p ->
