@@ -1,6 +1,7 @@
 package com.openclassrooms.safetynet.safetynetapi.repository;
 
 import com.openclassrooms.safetynet.safetynetapi.model.Person;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -10,13 +11,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryPersonRepositoryTest {
 
+    // Repository utilisé dans tous les tests
+    private InMemoryPersonRepository repository;
+
+    /**
+     * Initialise le repository avec une liste vide avant chaque test.
+     */
+    @BeforeEach
+    void setUp() {
+        // GIVEN : une instance vide du repository
+        repository = new InMemoryPersonRepository();
+        repository.setPersons(new ArrayList<>());// Initialize the list as empty
+    }
 
     @Test
     void findAll() {
-        // GIVEN : une instance vide du repository
-        InMemoryPersonRepository repository = new InMemoryPersonRepository();
-        repository.setPersons(new ArrayList<>()); // Initialize the list as empty
-
         // WHEN : on appelle findAll()
         List<Person> allPersons = repository.findAll();
 
@@ -37,10 +46,6 @@ class InMemoryPersonRepositoryTest {
 
     @Test
     void save() {
-        // GIVEN : une instance vide du repository
-        InMemoryPersonRepository repository = new InMemoryPersonRepository();
-        repository.setPersons(new ArrayList<>()); // Initialize the list as empty
-
         // WHEN : on ajoute une personne
         Person person = new Person();
         person.setFirstName("Nicolas");
@@ -54,10 +59,7 @@ class InMemoryPersonRepositoryTest {
 
     @Test
     void update() {
-        // GIVEN : un repository avec une personne existante
-        InMemoryPersonRepository repository = new InMemoryPersonRepository();
-        repository.setPersons(new ArrayList<>());
-
+        // GIVEN : une personne déjà enregistrée dans le repository
         Person person = new Person();
         person.setFirstName("Nicolas");
         person.setLastName("Travolta");
@@ -89,8 +91,8 @@ class InMemoryPersonRepositoryTest {
 
     @Test
     void delete() {
-        // GIVEN : un repository avec plusieurs personnes
-        InMemoryPersonRepository repository = getInMemoryPersonRepository();
+        // GIVEN : un repository avec plusieurs personnes (dont deux "Nicolas Travolta")
+        repository = getInMemoryPersonRepository();
 
         // WHEN : on supprime toutes les personnes "Nicolas Travolta"
         repository.delete("Nicolas", "Travolta");
@@ -134,9 +136,6 @@ class InMemoryPersonRepositoryTest {
     @Test
     void deleteFirstOccurrence() {
         // GIVEN : un repository avec plusieurs personnes
-        InMemoryPersonRepository repository = new InMemoryPersonRepository();
-        repository.setPersons(new ArrayList<>());
-
         Person person1 = new Person();
         person1.setFirstName("Nicolas");
         person1.setLastName("Travolta");
@@ -179,10 +178,7 @@ class InMemoryPersonRepositoryTest {
     @Test
     void findByFirstNameAndLastName() {
         // GIVEN : un repository avec plusieurs personnes
-        InMemoryPersonRepository repository = new InMemoryPersonRepository();
-        repository.setPersons(new ArrayList<>());
-
-        Person person1 = new Person();
+       Person person1 = new Person();
         person1.setFirstName("Nicolas");
         person1.setLastName("Travolta");
 
