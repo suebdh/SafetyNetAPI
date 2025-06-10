@@ -49,8 +49,15 @@ public class PersonController {
     }
 
     @PutMapping("/person")
-    public Person updatePerson(@RequestBody Person person) {
-        return personService.update(person);
+    public ResponseEntity<?>  updatePerson(@RequestBody Person person) {
+        try {
+            Person updated = personService.update(person);
+            log.info("Person {} {} updated successfully.", person.getFirstName(), person.getLastName());
+            return ResponseEntity.ok(updated);
+        } catch (PersonNotFoundException ex) {
+            log.warn("Cannot update person {} {}: not found.", person.getFirstName(), person.getLastName());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person not found to be updated");
+        }
     }
 
     @DeleteMapping("/person")

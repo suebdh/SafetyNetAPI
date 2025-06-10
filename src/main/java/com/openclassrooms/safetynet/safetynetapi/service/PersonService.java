@@ -29,6 +29,11 @@ public class PersonService {
     }
 
     public Person update(Person person) {
+        Person existing = personRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+        if (existing == null) {
+            throw new PersonNotFoundException("Cannot update, person not found: " +
+                    person.getFirstName() + " " + person.getLastName());
+        }
         return personRepository.update(person);
     }
 
