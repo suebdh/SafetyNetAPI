@@ -47,12 +47,26 @@
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
         </dependency>
+        <!-- Enables Spring Boot to route logging through Log4j2 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+
         <!-- Provides the necessary components to build web applications using Spring MVC.
       Includes an embedded Tomcat server, Jackson for JSON processing, and a logging framework. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <!-- Exclude Logback since we are using Log4j2 -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
         <!-- Provides testing libraries for unit and integration testing:
      JUnit, Mockito, Spring Test, AssertJ, and more. -->
         <dependency>
