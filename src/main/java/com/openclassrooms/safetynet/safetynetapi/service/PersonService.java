@@ -1,5 +1,6 @@
 package com.openclassrooms.safetynet.safetynetapi.service;
 
+import com.openclassrooms.safetynet.safetynetapi.exception.PersonNotFoundException;
 import com.openclassrooms.safetynet.safetynetapi.model.Person;
 import com.openclassrooms.safetynet.safetynetapi.repository.DataLoader;
 import com.openclassrooms.safetynet.safetynetapi.repository.PersonRepository;
@@ -13,7 +14,7 @@ public class PersonService {
     @Autowired
     private PersonRepository personRepository;
 
-    public List<Person> getAllPersons(){
+    public List<Person> getAllPersons() {
         return personRepository.findAll();
     }
 
@@ -26,7 +27,11 @@ public class PersonService {
     }
 
     public void delete(String firstName, String lastName) {
-        personRepository.delete(firstName, lastName);
+        Person person = personRepository.findByFirstNameAndLastName(firstName, lastName);
+        if (person == null)
+            throw new PersonNotFoundException("Person not found " + firstName + " " + lastName);
+        else
+            personRepository.delete(firstName, lastName);
     }
 
     public Person findByFirstNameAndLastName(String firstName, String lastName) {

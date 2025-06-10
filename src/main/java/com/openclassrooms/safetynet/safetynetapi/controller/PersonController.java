@@ -1,12 +1,17 @@
 package com.openclassrooms.safetynet.safetynetapi.controller;
 
+import com.openclassrooms.safetynet.safetynetapi.exception.PersonNotFoundException;
 import com.openclassrooms.safetynet.safetynetapi.model.Person;
 import com.openclassrooms.safetynet.safetynetapi.service.PersonService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Log4j2
 @RestController
 public class PersonController {
 
@@ -29,8 +34,14 @@ public class PersonController {
     }
 
     @DeleteMapping("/person")
-    public void deletePerson(@RequestParam String firstName, @RequestParam String lastName) {
-        personService.delete(firstName, lastName);
+    public ResponseEntity<String> deletePerson(@RequestParam String firstName, @RequestParam String lastName) {
+        try {
+            personService.delete(firstName, lastName);
+            log.info("Person {} {} deleted successfully.", firstName, lastName);
+            return ResponseEntity.ok("Person deleted successfully.");
+        } catch (PersonNotFoundException ex) {
+            log.warn("Person {} {} not found, deletion impossible.", firstName, lastName);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person not found, deletion impossible");
+        }
     }
-
 }
