@@ -23,6 +23,18 @@ public class PersonController {
         return personService.getAllPersons();
     }
 
+    @GetMapping("/person")
+    public ResponseEntity<Person> getPerson(@RequestParam String firstName, @RequestParam String lastName) {
+        try {
+            Person person = personService.findByFirstNameAndLastName(firstName, lastName);
+            log.info("Fetched person: {} {}", firstName, lastName);
+            return ResponseEntity.ok(person);
+        } catch (PersonNotFoundException ex) {
+            log.warn("Person {} {} not found.", firstName, lastName);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
     @PostMapping("/person")  // Mapper la méthode sur l’URL /person et la méthode HTTP POST
     public Person addPerson(@RequestBody Person person) {  // Récupérer le JSON de la requête, converti en objet Person
         return personService.save(person);  // Appeler le service pour sauvegarder la personne et Renvoyer la personne sauvegardée
