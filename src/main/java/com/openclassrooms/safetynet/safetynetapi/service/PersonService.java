@@ -1,5 +1,6 @@
 package com.openclassrooms.safetynet.safetynetapi.service;
 
+import com.openclassrooms.safetynet.safetynetapi.exception.PersonAlreadyExistsException;
 import com.openclassrooms.safetynet.safetynetapi.exception.PersonNotFoundException;
 import com.openclassrooms.safetynet.safetynetapi.model.Person;
 import com.openclassrooms.safetynet.safetynetapi.repository.PersonRepository;
@@ -20,6 +21,10 @@ public class PersonService {
     }
 
     public Person save(Person person) {
+        Person existing = personRepository.findByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+        if (existing != null) {
+            throw new PersonAlreadyExistsException("Person " + person.getFirstName() + " " + person.getLastName() + " already exists");
+        }
         return personRepository.save(person);
     }
 

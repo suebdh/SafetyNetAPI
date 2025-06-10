@@ -1,5 +1,6 @@
 package com.openclassrooms.safetynet.safetynetapi.controller;
 
+import com.openclassrooms.safetynet.safetynetapi.exception.PersonAlreadyExistsException;
 import com.openclassrooms.safetynet.safetynetapi.exception.PersonNotFoundException;
 import com.openclassrooms.safetynet.safetynetapi.model.Person;
 import com.openclassrooms.safetynet.safetynetapi.service.PersonService;
@@ -35,9 +36,16 @@ public class PersonController {
         }
     }
 
-    @PostMapping("/person")  // Mapper la méthode sur l’URL /person et la méthode HTTP POST
-    public Person addPerson(@RequestBody Person person) {  // Récupérer le JSON de la requête, converti en objet Person
-        return personService.save(person);  // Appeler le service pour sauvegarder la personne et Renvoyer la personne sauvegardée
+    @PostMapping("/person")
+    public ResponseEntity<?> addPerson(@RequestBody Person person) {
+        try {
+            Person saved = personService.save(person);
+            log.info("Person {} {} added successfully.", person.getFirstName(), person.getLastName());
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        } catch (PersonAlreadyExistsException ex) {
+            log.warn("Cannot add person {} {}: already exists.", person.getFirstName(), person.getLastName());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Person already exists");
+        }
     }
 
     @PutMapping("/person")
