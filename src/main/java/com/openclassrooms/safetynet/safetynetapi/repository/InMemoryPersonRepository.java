@@ -4,13 +4,12 @@ import com.openclassrooms.safetynet.safetynetapi.model.Person;
 import jakarta.annotation.PostConstruct;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-@Repository
+
 public class InMemoryPersonRepository implements PersonRepository {
     @Autowired
     private DataLoader dataLoader;
