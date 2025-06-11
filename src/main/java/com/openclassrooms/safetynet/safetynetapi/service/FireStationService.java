@@ -53,7 +53,7 @@ public class FireStationService {
         return firestationToUpdate;
     }
 
-    public void saveFirestation(FireStation firestation) {
+    public FireStation saveFirestation(FireStation firestation) {
         log.info("Request received to save firestation at address '{}' with station number {}",
                 firestation.getAddress(), firestation.getStation());
 
@@ -68,6 +68,8 @@ public class FireStationService {
 
         log.info("Firestation saved successfully at address '{}' with station number {}",
                 firestation.getAddress(), firestation.getStation());
+
+        return firestation;
     }
 
     public void deleteFirestationByAddress(String address) {
