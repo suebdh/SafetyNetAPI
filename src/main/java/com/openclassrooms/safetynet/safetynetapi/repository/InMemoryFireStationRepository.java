@@ -56,15 +56,16 @@ public class InMemoryFireStationRepository implements FireStationRepository {
     }
 
     @Override
-    public void updateFirestation(FireStation fireStation) {
+    public FireStation updateFirestation(FireStation fireStation) {
         for (FireStation fs : fireStations) {
             if (fs.getAddress().equalsIgnoreCase(fireStation.getAddress())) {
                 fs.setStation(fireStation.getStation());
                 log.debug("Firestation at address '{}' updated with station number {}", fs.getAddress(), fs.getStation());
-                return;
+                return fs;
             }
         }
         log.debug("No firestation found at address '{}', update skipped", fireStation.getAddress());
+        return null;
 
     }
 

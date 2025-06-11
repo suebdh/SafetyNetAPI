@@ -5,11 +5,13 @@ import com.openclassrooms.safetynet.safetynetapi.exception.PersonNotFoundExcepti
 import com.openclassrooms.safetynet.safetynetapi.model.Person;
 import com.openclassrooms.safetynet.safetynetapi.repository.PersonRepository;
 import lombok.Data;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Log4j2
 @Service
 @Data
 public class PersonService {
@@ -17,7 +19,9 @@ public class PersonService {
     private PersonRepository personRepository;
 
     public List<Person> getAllPersons() {
-        return personRepository.findAll();
+        List<Person> persons = personRepository.findAll();
+        log.info("{} fire station(s) found", persons.size());
+        return persons;
     }
 
     public Person save(Person person) {
