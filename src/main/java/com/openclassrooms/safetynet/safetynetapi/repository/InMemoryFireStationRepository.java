@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 
 @Log4j2
-@Repository
 public class InMemoryFireStationRepository implements FireStationRepository {
 
     @Autowired
@@ -22,10 +21,12 @@ public class InMemoryFireStationRepository implements FireStationRepository {
     @PostConstruct
     public void init() {
         fireStations = new ArrayList<>(dataLoader.getDataFile().getFirestations());
+        log.debug("Fire Stations loaded: {}", fireStations.size());
     }
 
     @Override
     public List<FireStation> getFirestations() {
+        log.debug("Fetching all fire stations. Total: {}", fireStations.size());
         return fireStations;
     }
 

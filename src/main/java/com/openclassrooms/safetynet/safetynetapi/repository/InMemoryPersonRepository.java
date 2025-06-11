@@ -3,13 +3,14 @@ package com.openclassrooms.safetynet.safetynetapi.repository;
 import com.openclassrooms.safetynet.safetynetapi.model.Person;
 import jakarta.annotation.PostConstruct;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-
+@Log4j2
 public class InMemoryPersonRepository implements PersonRepository {
     @Autowired
     private DataLoader dataLoader;
@@ -21,10 +22,12 @@ public class InMemoryPersonRepository implements PersonRepository {
     @PostConstruct
     public void init() {
         persons = new ArrayList<>(dataLoader.getDataFile().getPersons());
+        log.debug("Persons loaded: {}", persons.size());
     }
 
     @Override
     public List<Person> findAll() {
+        log.debug("Fetching all persons. Total: {}", persons.size());
         return persons;
     }
 
