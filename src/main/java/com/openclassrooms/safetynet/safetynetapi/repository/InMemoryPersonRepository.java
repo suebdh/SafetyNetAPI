@@ -55,6 +55,7 @@ public class InMemoryPersonRepository implements PersonRepository {
         return null; // if Person not found
 
     }
+
     //removeIf removes ALL people who match this first name and last name
     @Override
     public void delete(String firstName, String lastName) {
@@ -80,6 +81,19 @@ public class InMemoryPersonRepository implements PersonRepository {
     public List<Person> findByCity(String city) {
         return persons.stream()
                 .filter(person -> person.getCity().equalsIgnoreCase(city))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Finds all persons whose last name matches the given lastName (case-insensitive).
+     *
+     * @param lastName the last name to search for
+     * @return a list of matching Person objects; empty list if none found
+     */
+    @Override
+    public List<Person> findByLastName(String lastName) {
+        return persons.stream().
+                filter(person -> person.getLastName().equalsIgnoreCase(lastName))
                 .collect(Collectors.toList());
     }
 

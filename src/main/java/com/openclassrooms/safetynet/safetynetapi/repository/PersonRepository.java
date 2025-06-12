@@ -16,4 +16,5 @@ public interface PersonRepository {
     Person findByFirstNameAndLastName(String firstName, String lastName);
 
     List<Person> findByCity(String city);
+    List<Person> findByLastName(String lastName);
 }

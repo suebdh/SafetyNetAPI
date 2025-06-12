@@ -1,9 +1,9 @@
 package com.openclassrooms.safetynet.safetynetapi.controller;
 
 import com.openclassrooms.safetynet.safetynetapi.dto.PersonDTO;
+import com.openclassrooms.safetynet.safetynetapi.dto.PersonInfoDto;
 import com.openclassrooms.safetynet.safetynetapi.exception.PersonAlreadyExistsException;
 import com.openclassrooms.safetynet.safetynetapi.exception.PersonNotFoundException;
-import com.openclassrooms.safetynet.safetynetapi.model.Person;
 import com.openclassrooms.safetynet.safetynetapi.service.PersonService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +50,7 @@ public class PersonController {
     }
 
     @PutMapping("/person")
-    public ResponseEntity<?>  updatePerson(@RequestBody PersonDTO personDTO) {
+    public ResponseEntity<?> updatePerson(@RequestBody PersonDTO personDTO) {
         try {
             PersonDTO updated = personService.update(personDTO);
             log.info("Person {} {} updated successfully.", updated.getFirstName(), updated.getLastName());
@@ -74,15 +74,36 @@ public class PersonController {
     }
 
     @GetMapping("/communityEmail")
-    public ResponseEntity<List<String>>getCommunityEmails(@RequestParam String city){
+    public ResponseEntity<List<String>> getCommunityEmails(@RequestParam String city) {
         List<String> emails = personService.getEmailsByCity(city);
-        if (emails.isEmpty()){
+        if (emails.isEmpty()) {
             log.info("No email found for city {}", city);
             return ResponseEntity.noContent().build();
-        }
-        else {
+        } else {
             log.info("Found {} email(s) for city {}", emails.size(), city);
             return ResponseEntity.ok(emails);
         }
+    }
+
+    /**
+     * Handles GET requests to retrieve personal information by last name.
+     *
+     * @param lastName the last name to filter persons by
+     * @return ResponseEntity containing a list of PersonInfoDto if found,
+     * or 404 Not Found if no matching persons exist
+     */
+    @GetMapping("/personInfo")
+    public ResponseEntity<List<PersonInfoDto>> getPersonInfo(@RequestParam String lastName) {
+        log.info("Request received for /personInfo with lastName: {}", lastName);
+        List<PersonInfoDto> result = personService.getPersonInfoByLastName(lastName);
+
+        if (result.isEmpty()) {
+            log.warn("No persons found with lastName: {}", lastName);
+            return ResponseEntity.notFound().build();
+        }
+
+        log.info("{} person(s) found with lastName '{}'", result.size(), lastName);
+        return ResponseEntity.ok(result);
+
     }
 }
