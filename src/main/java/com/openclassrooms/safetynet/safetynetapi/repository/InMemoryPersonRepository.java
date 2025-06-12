@@ -5,12 +5,15 @@ import jakarta.annotation.PostConstruct;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Log4j2
+@Repository
 public class InMemoryPersonRepository implements PersonRepository {
     @Autowired
     private DataLoader dataLoader;
@@ -52,6 +55,7 @@ public class InMemoryPersonRepository implements PersonRepository {
         return null; // if Person not found
 
     }
+
     //removeIf removes ALL people who match this first name and last name
     @Override
     public void delete(String firstName, String lastName) {
@@ -71,6 +75,26 @@ public class InMemoryPersonRepository implements PersonRepository {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<Person> findByCity(String city) {
+        return persons.stream()
+                .filter(person -> person.getCity().equalsIgnoreCase(city))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Finds all persons whose last name matches the given lastName (case-insensitive).
+     *
+     * @param lastName the last name to search for
+     * @return a list of matching Person objects; empty list if none found
+     */
+    @Override
+    public List<Person> findByLastName(String lastName) {
+        return persons.stream().
+                filter(person -> person.getLastName().equalsIgnoreCase(lastName))
+                .collect(Collectors.toList());
     }
 
     @Override

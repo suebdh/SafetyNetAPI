@@ -4,11 +4,13 @@ import com.openclassrooms.safetynet.safetynetapi.model.MedicalRecord;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Log4j2
+@Repository
 public class InMemoryMedicalRecordRepository implements MedicalRecordRepository {
     @Autowired
     private DataLoader dataLoader;

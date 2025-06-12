@@ -14,4 +14,7 @@ public interface PersonRepository {
     void delete (String firstName, String lastName);
     void deleteFirstOccurrence(String firstName, String lastName);
     Person findByFirstNameAndLastName(String firstName, String lastName);
+
+    List<Person> findByCity(String city);
+    List<Person> findByLastName(String lastName);
 }
