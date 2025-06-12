@@ -72,4 +72,17 @@ public class PersonController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person not found, deletion impossible");
         }
     }
+
+    @GetMapping("/communityEmail")
+    public ResponseEntity<List<String>>getCommunityEmails(@RequestParam String city){
+        List<String> emails = personService.getEmailsByCity(city);
+        if (emails.isEmpty()){
+            log.info("No email found for city {}", city);
+            return ResponseEntity.noContent().build();
+        }
+        else {
+            log.info("Found {} email(s) for city {}", emails.size(), city);
+            return ResponseEntity.ok(emails);
+        }
+    }
 }

@@ -87,5 +87,9 @@ public class PersonService {
         personRepository.deleteFirstOccurrence(firstName, lastName);
     }
 
+    public List<String> getEmailsByCity(String city){
+        List<Person> persons = personRepository.findByCity(city);
+        return persons.stream().map(Person::getEmail).distinct().collect(Collectors.toList());
+    }
 
 }

@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 
 @Log4j2
+@Repository
 public class InMemoryFireStationRepository implements FireStationRepository {
 
     @Autowired
