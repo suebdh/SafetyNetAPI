@@ -17,18 +17,39 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
 
     private List<MedicalRecord> medicalRecords;
 
+    /**
+     * Initializes the in-memory mutable list of medical records.
+     * This method runs after dependency injection, loading medical records from the JSON data file via DataLoader.
+     * It copies them into a new ArrayList to allow modifications during runtime.
+     * Logs the count of medical records loaded at debug level.
+     */
     @PostConstruct
     public void init() {
         this.medicalRecords = new ArrayList<>(dataLoader.getDataFile().getMedicalrecords());
         log.debug("Medical records loaded: {}", medicalRecords.size());
     }
 
+    /**
+     * Retrieves all medical records stored in memory.
+     *
+     * @return a list of all MedicalRecord objects; never null but can be empty
+     */
     @Override
     public List<MedicalRecord> getAllMedicalRecords() {
         log.debug("Fetching all medical records. Total: {}", medicalRecords.size());
         return medicalRecords;
     }
 
+    /**
+     * Retrieves the medical record matching the given first name and last name.
+     *
+     * <p>This method performs a case-insensitive search on both first name and last name
+     * and returns the first matching record found in the in-memory list.</p>
+     *
+     * @param firstName the first name to search for (case-insensitive)
+     * @param lastName the last name to search for (case-insensitive)
+     * @return the first matching MedicalRecord if found; otherwise, returns null
+     */
     @Override
     public MedicalRecord getMedicalRecordByFirstNameAndLastName(String firstName, String lastName) {
         List<MedicalRecord> results = medicalRecords.stream()
@@ -45,6 +66,12 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
         }
     }
 
+    /**
+     * Adds a new medical record to the in-memory list, updates the main data file,
+     * and persists the changes to the external JSON file.
+     *
+     * @param medicalRecord the medical record to be saved
+     */
     @Override
     public void saveMedicalRecord(MedicalRecord medicalRecord) {
         medicalRecords.add(medicalRecord);
@@ -54,8 +81,24 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
                 medicalRecord.getBirthdate(),
                 medicalRecord.getMedications(),
                 medicalRecord.getAllergies());
+
+        // Update the source DataFile
+        dataLoader.getDataFile().setMedicalrecords(medicalRecords);
+
+        // Persist changes to the JSON file
+        dataLoader.saveJsonFile();
     }
 
+    /**
+     * Updates an existing medical record matching the first name and last name.
+     * <p>
+     * If a matching record is found, updates its birthdate, medications, and allergies,
+     * then persists the changes to the JSON data file.
+     * </p>
+     *
+     * @param medicalRecord the medical record containing updated information
+     * @return the updated MedicalRecord if found and updated; otherwise, returns null
+     */
     @Override
     public MedicalRecord updateMedicalRecord(MedicalRecord medicalRecord) {
         for (MedicalRecord mr : medicalRecords) {
@@ -73,6 +116,12 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
                         mr.getMedications(),
                         mr.getAllergies());
 
+                // Update the source DataFile
+                dataLoader.getDataFile().setMedicalrecords(medicalRecords);
+
+                // Persist changes to the JSON file
+                dataLoader.saveJsonFile();
+
                 return mr;
             }
         }
@@ -84,6 +133,14 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
         return null;
     }
 
+    /**
+     * Deletes a medical record identified by first name and last name.
+     * If the record is found and deleted, the in-memory list and the JSON file are updated accordingly.
+     *
+     * @param firstName the first name of the medical record to delete
+     * @param lastName the last name of the medical record to delete
+     * @return true if the record was found and deleted; false otherwise
+     */
     @Override
     public boolean deleteMedicalRecord(String firstName, String lastName) {
         boolean removed = medicalRecords.removeIf(mr ->
@@ -92,6 +149,12 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
 
         if (removed) {
             log.debug("Medical record for {} {} deleted", firstName, lastName);
+
+            // Update the source DataFile
+            dataLoader.getDataFile().setMedicalrecords(medicalRecords);
+
+            // Persist changes to the JSON file
+            dataLoader.saveJsonFile();
         } else {
             log.debug("No medical record found for {} {}, nothing deleted", firstName, lastName);
         }

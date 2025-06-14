@@ -66,7 +66,7 @@ public class PersonController {
         try {
             personService.delete(firstName, lastName);
             log.info("Person {} {} deleted successfully.", firstName, lastName);
-            return ResponseEntity.ok("Person deleted successfully.");
+            return ResponseEntity.ok("Person " + firstName + " " + lastName + " deleted successfully.");
         } catch (PersonNotFoundException ex) {
             log.warn("Person {} {} not found, deletion impossible.", firstName, lastName);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person not found, deletion impossible");

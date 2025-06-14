@@ -76,11 +76,11 @@ public class PersonService {
     }
 
     public void delete(String firstName, String lastName) {
-        Person person = personRepository.findByFirstNameAndLastName(firstName, lastName);
-        if (person == null)
-            throw new PersonNotFoundException("Person not found " + firstName + " " + lastName);
-        else
-            personRepository.delete(firstName, lastName);
+        boolean removed = personRepository.delete(firstName, lastName);
+
+        if (!removed) {
+            throw new PersonNotFoundException("Person not found: " + firstName + " " + lastName);
+        }
     }
 
     public PersonDTO findByFirstNameAndLastName(String firstName, String lastName) {

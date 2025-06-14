@@ -9,7 +9,7 @@ import java.util.List;
 public interface FireStationRepository {
     List<FireStation> getFirestations();
 
-    List<FireStation> getFirestationByStationNumber(Integer station);
+    List<FireStation> getFirestationByStationNumber(int station);
 
     FireStation getFirestationByAddress(String address);
 
