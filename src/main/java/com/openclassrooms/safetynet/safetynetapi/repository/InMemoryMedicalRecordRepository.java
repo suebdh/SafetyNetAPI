@@ -17,6 +17,12 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
 
     private List<MedicalRecord> medicalRecords;
 
+    /**
+     * Initializes the in-memory mutable list of medical records.
+     * This method runs after dependency injection, loading medical records from the JSON data file via DataLoader.
+     * It copies them into a new ArrayList to allow modifications during runtime.
+     * Logs the count of medical records loaded at debug level.
+     */
     @PostConstruct
     public void init() {
         this.medicalRecords = new ArrayList<>(dataLoader.getDataFile().getMedicalrecords());
