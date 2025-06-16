@@ -11,6 +11,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service class responsible for managing fire station data and operations.
+ * <p>
+ * This service interacts with the FireStationRepository to perform CRUD operations
+ * and contains business logic related to fire stations, such as validation
+ * and exception handling for non-existing or duplicate fire stations.
+ * </p>
+ */
 @Log4j2
 @Service
 @Data
@@ -19,26 +27,53 @@ public class FireStationService {
     @Autowired
     private FireStationRepository fireStationRepository;
 
+    /**
+     * Retrieves all fire stations from the repository.
+     *
+     * @return a list of all FireStation objects; the list may be empty if no fire stations are found.
+     */
     public List<FireStation> getAllFireStations() {
         List<FireStation> firestations = fireStationRepository.getFirestations();
         log.info("{} fire station(s) found", firestations.size());
         return firestations;
     }
 
+    /**
+     * Retrieves a fire station by its address.
+     * <p>
+     * This method searches for a fire station matching the provided address.
+     * If a fire station is found, it is returned; otherwise, a
+     * {@link FireStationNotFoundException} is thrown.
+     * </p>
+     *
+     * @param address the address of the fire station to retrieve
+     * @return the FireStation found at the specified address
+     * @throws FireStationNotFoundException if no fire station is found at the given address
+     */
     public FireStation getFirestationByAddress(String address) {
         log.info("Request received to find firestation by address: '{}'", address);
 
         FireStation firestation = fireStationRepository.getFirestationByAddress(address);
 
-        if (firestation != null) {
-            log.info("Firestation found at address '{}'", address);
-        } else {
+        if (firestation == null) {
             log.error("No firestation found at address '{}'", address);
+            throw new FireStationNotFoundException("No firestation found at address: " + address);
         }
 
+        log.info("Firestation found at address '{}'", address);
         return firestation;
     }
 
+    /**
+     * Updates an existing fire station's information.
+     * <p>
+     * This method attempts to update the fire station associated with the given address.
+     * If no matching fire station is found, a FireStationNotFoundException is thrown.
+     *
+     * @param firestation the FireStation object containing updated address and station number
+     * @return the updated FireStation object
+     * @throws FireStationNotFoundException if no fire station is found at the specified address
+     */
     public FireStation updateFirestation(FireStation firestation) {
         log.info("Request received to update firestation at address '{}'", firestation.getAddress());
 
@@ -53,6 +88,16 @@ public class FireStationService {
         return firestationToUpdate;
     }
 
+    /**
+     * Saves a new fire station to the system.
+     * <p>
+     * This method stores the provided FireStation object if no fire station already exists at the specified address.
+     * If a fire station is already present, a FireStationAlreadyExistsException is thrown.
+     *
+     * @param firestation the FireStation object to be saved
+     * @return the saved FireStation object
+     * @throws FireStationAlreadyExistsException if a fire station already exists at the given address
+     */
     public FireStation saveFirestation(FireStation firestation) {
         log.info("Request received to save firestation at address '{}' with station number {}",
                 firestation.getAddress(), firestation.getStation());
@@ -72,6 +117,15 @@ public class FireStationService {
         return firestation;
     }
 
+    /**
+     * Deletes a fire station identified by its address.
+     * <p>
+     * This method attempts to delete the first occurrence of a fire station at the specified address.
+     * If no fire station is found at the given address, a FireStationNotFoundException is thrown.
+     *
+     * @param address the address of the fire station to delete
+     * @throws FireStationNotFoundException if no fire station is found at the specified address
+     */
     public void deleteFirestationByAddress(String address) {
         log.info("Request received to delete firestation at address '{}'", address);
 
@@ -85,6 +139,14 @@ public class FireStationService {
         }
     }
 
+    /**
+     * Deletes all fire stations associated with the given station number.
+     * <p>
+     * If no fire stations are found with the specified station number, a FireStationNotFoundException is thrown.
+     *
+     * @param stationNumber the station number whose associated fire stations should be deleted
+     * @throws FireStationNotFoundException if no fire stations are found with the given station number
+     */
     public void deleteFirestationsByStationNumber(int stationNumber) {
         log.info("Request received to delete all firestations with station number {}", stationNumber);
 
