@@ -71,5 +71,29 @@ public class GlobalExceptionHandler {
 
     }
 
+    /**
+     * Handles cases where an attempt to create a medical record fails because it already exists.
+     *
+     * @param ex the exception containing the error message indicating the medical record already exists
+     * @return a 409 Conflict HTTP response with the exception message as the response body
+     */
+    @ExceptionHandler(MedicalRecordAlreadyExistsException.class)
+    public ResponseEntity<String> handleMedicalRecordAlreadyExists(MedicalRecordAlreadyExistsException ex) {
+        log.warn("MedicalRecord already exists: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    /**
+     * Handles cases where an attempt to retrieve, update, or delete a medical record fails
+     * because the medical record does not exist in the system.
+     *
+     * @param ex the exception containing the error message indicating that the medical record was not found
+     * @return a 404 Not Found HTTP response with the exception message as the response body
+     */
+    @ExceptionHandler(MedicalRecordNotFoundException.class)
+    public ResponseEntity<String> handleMedicalRecordNotFound(MedicalRecordNotFoundException ex) {
+        log.warn("Cannot perform operation, MedicalRecord not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
 
     }
