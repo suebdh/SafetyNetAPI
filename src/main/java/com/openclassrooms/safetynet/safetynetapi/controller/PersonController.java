@@ -2,8 +2,6 @@ package com.openclassrooms.safetynet.safetynetapi.controller;
 
 import com.openclassrooms.safetynet.safetynetapi.dto.PersonDTO;
 import com.openclassrooms.safetynet.safetynetapi.dto.PersonInfoDto;
-import com.openclassrooms.safetynet.safetynetapi.exception.PersonAlreadyExistsException;
-import com.openclassrooms.safetynet.safetynetapi.exception.PersonNotFoundException;
 import com.openclassrooms.safetynet.safetynetapi.service.PersonService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +11,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller to manage Person resources.
+ * <p>
+ * Provides endpoints to create, read, update, and delete persons,
+ * as well as additional queries like fetching emails by city or personal info by last name.
+ * </p>
+ */
 @Log4j2
 @RestController
 public class PersonController {
@@ -20,59 +25,79 @@ public class PersonController {
     @Autowired
     private PersonService personService;
 
+    /**
+     * Retrieves the list of all persons.
+     *
+     * @return List of PersonDTO objects representing all persons in the system.
+     */
     @GetMapping("/persons")
-    List<PersonDTO> getAllPersons() {
+    public List<PersonDTO> getAllPersons() {
         return personService.getAllPersons();
     }
 
+    /**
+     * Retrieves a person by their first and last name.
+     *
+     * @param firstName the first name of the person
+     * @param lastName  the last name of the person
+     * @return ResponseEntity containing the PersonDTO if found, or 404 status if not found
+     */
     @GetMapping("/person")
     public ResponseEntity<PersonDTO> getPerson(@RequestParam String firstName, @RequestParam String lastName) {
-        try {
-            PersonDTO personDTO = personService.findByFirstNameAndLastName(firstName, lastName);
-            log.info("Fetched person: {} {}", firstName, lastName);
-            return ResponseEntity.ok(personDTO);
-        } catch (PersonNotFoundException ex) {
-            log.warn("Person {} {} not found.", firstName, lastName);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        PersonDTO personDTO = personService.findByFirstNameAndLastName(firstName, lastName);
+        log.info("Fetched person: {} {}", firstName, lastName);
+        return ResponseEntity.ok(personDTO);
     }
 
+    /**
+     * Adds a new person to the system.
+     * <p>
+     * Receives a PersonDTO in the request body, saves it via the service layer, and returns the saved person with HTTP status 201 Created.
+     * <p>
+     * If the person already exists, a PersonAlreadyExistsException will be thrown and handled globally.
+     *
+     * @param personDTO the data of the person to add
+     * @return a ResponseEntity with status 201 Created and the saved person in the body
+     */
     @PostMapping("/person")
     public ResponseEntity<?> addPerson(@RequestBody PersonDTO personDTO) {
-        try {
-            PersonDTO saved = personService.save(personDTO);
-            log.info("Person {} {} added successfully.", saved.getFirstName(), saved.getLastName());
-            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-        } catch (PersonAlreadyExistsException ex) {
-            log.warn("Cannot add person {} {}: already exists.", personDTO.getFirstName(), personDTO.getLastName());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Person already exists");
-        }
+        PersonDTO saved = personService.save(personDTO);
+        log.info("Person {} {} added successfully.", saved.getFirstName(), saved.getLastName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    /**
+     * Updates an existing person's information.
+     * <p>
+     * Receives a PersonDTO in the request body, updates it via the service layer, and returns the updated person with HTTP status 200 OK.
+     * If the person does not exist, a PersonNotFoundException will be thrown and handled globally.
+     * </p>
+     *
+     * @param personDTO the data of the person to update
+     * @return a ResponseEntity with status 200 OK and the updated person in the body
+     */
     @PutMapping("/person")
     public ResponseEntity<?> updatePerson(@RequestBody PersonDTO personDTO) {
-        try {
-            PersonDTO updated = personService.update(personDTO);
-            log.info("Person {} {} updated successfully.", updated.getFirstName(), updated.getLastName());
-            return ResponseEntity.ok(updated);
-        } catch (PersonNotFoundException ex) {
-            log.warn("Cannot update person {} {}: not found.", personDTO.getFirstName(), personDTO.getLastName());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person not found to be updated");
-        }
+        PersonDTO updated = personService.update(personDTO);
+        log.info("Person {} {} updated successfully.", updated.getFirstName(), updated.getLastName());
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/person")
     public ResponseEntity<String> deletePerson(@RequestParam String firstName, @RequestParam String lastName) {
-        try {
-            personService.delete(firstName, lastName);
-            log.info("Person {} {} deleted successfully.", firstName, lastName);
-            return ResponseEntity.ok("Person " + firstName + " " + lastName + " deleted successfully.");
-        } catch (PersonNotFoundException ex) {
-            log.warn("Person {} {} not found, deletion impossible.", firstName, lastName);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person not found, deletion impossible");
-        }
+        personService.delete(firstName, lastName);
+        log.info("Person {} {} deleted successfully.", firstName, lastName);
+        return ResponseEntity.ok("Person " + firstName + " " + lastName + " deleted successfully.");
     }
 
+    /**
+     * Retrieves the list of email addresses for all persons residing in the specified city.
+     *
+     * @param city the name of the city for which to retrieve community emails
+     * @return a ResponseEntity containing:
+     * - HTTP 200 OK and a list of emails if any are found,
+     * - HTTP 204 No Content if no emails are found for the city
+     */
     @GetMapping("/communityEmail")
     public ResponseEntity<List<String>> getCommunityEmails(@RequestParam String city) {
         List<String> emails = personService.getEmailsByCity(city);
@@ -86,11 +111,12 @@ public class PersonController {
     }
 
     /**
-     * Handles GET requests to retrieve personal information by last name.
+     * Handles GET requests to retrieve personal information filtered by last name.
      *
-     * @param lastName the last name to filter persons by
-     * @return ResponseEntity containing a list of PersonInfoDto if found,
-     * or 404 Not Found if no matching persons exist
+     * @param lastName the last name used to filter persons
+     * @return ResponseEntity containing:
+     * - HTTP 200 OK and a list of PersonInfoDto if matching persons are found,
+     * - HTTP 404 Not Found if no persons match the provided last name
      */
     @GetMapping("/personInfo")
     public ResponseEntity<List<PersonInfoDto>> getPersonInfo(@RequestParam String lastName) {
