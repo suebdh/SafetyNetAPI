@@ -45,6 +45,21 @@ public class InMemoryPersonRepository implements PersonRepository {
     }
 
     /**
+     * Get a list of persons by address
+     *
+     * @param address String address of the person (case-insensitive)
+     * @return List of Person objects
+     */
+    public List<Person> getPersonByAddress(String address) {
+
+        List<Person> persons = findAll().stream()
+                .filter(p -> p.getAddress().equalsIgnoreCase(address))
+                .toList();
+        log.debug("{} persons with address {} found", persons.size(), address);
+        return persons;
+    }
+
+    /**
      * Adds a new Person to the in-memory list and persists the updated list to the external JSON file
      *
      * @param person the Person object to add
