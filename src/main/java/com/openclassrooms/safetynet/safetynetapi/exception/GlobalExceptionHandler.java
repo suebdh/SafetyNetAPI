@@ -27,9 +27,10 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(PersonNotFoundException.class)
     public ResponseEntity<String> handlePersonNotFound(PersonNotFoundException ex) {
-        log.warn("Person not found: {}", ex.getMessage());
+        log.warn("Can not do this operation, Person not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
+
 
     /**
      * Handles cases where an attempt to create a person fails because the person already exists.
@@ -43,4 +44,32 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
 
     }
-}
+
+    /**
+     * Handles cases where an attempt to create a fire station fails because it already exists.
+     *
+     * @param ex the exception containing the error message indicating the fire station already exists
+     * @return a 409 Conflict HTTP response with the exception message as the response body
+     */
+    @ExceptionHandler(FireStationAlreadyExistsException.class)
+    public ResponseEntity<String> handleFireStationAlreadyExists(FireStationAlreadyExistsException ex) {
+        log.warn("FireStation already exists: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    /**
+     * Handles cases where an attempt to retrieve, update, or delete a fire station fails
+     * because the fire station does not exist in the system.
+     *
+     * @param ex the exception containing the error message indicating that the fire station was not found
+     * @return a 404 Not Found HTTP response with the exception message as the response body
+     */
+    @ExceptionHandler(FireStationNotFoundException.class)
+    public ResponseEntity<String> handleFireStationNotFound(FireStationNotFoundException ex) {
+        log.warn("Can not do this operation, FireStation not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+
+    }
+
+
+    }

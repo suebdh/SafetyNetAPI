@@ -19,67 +19,109 @@ public class FireStationController {
     @Autowired
     private FireStationService fireStationService;
 
+    /**
+     * Handles GET requests to retrieve all fire stations.
+     *
+     * @return ResponseEntity containing:
+     * - HTTP 200 OK and the list of fire stations if any exist,
+     * - HTTP 204 No Content if no fire stations are found.
+     */
     @GetMapping("/firestation")
     public ResponseEntity<List<FireStation>> getFirestations() {
         log.info("GET request received for all firestations");
 
         List<FireStation> fireStations = fireStationService.getAllFireStations();
 
-        log.info("Returning {} firestation(s)", fireStations.size());
+        if (fireStations.isEmpty()) {
+            log.info("No firestations found.");
+            return ResponseEntity.noContent().build(); // 204 No Content
+        }
 
+        log.info("Returning {} firestation(s)", fireStations.size());
         return ResponseEntity.ok(fireStations);
     }
 
+    /**
+     * Handles POST requests to add a new fire station.
+     *
+     * @param fireStation the FireStation object to be added
+     * @return ResponseEntity containing:
+     * - HTTP 201 Created and the saved FireStation object upon successful creation
+     */
     @PostMapping("/firestation")
     public ResponseEntity<?> addFireStation(@RequestBody FireStation fireStation) {
-        try {
-            FireStation saved = fireStationService.saveFirestation(fireStation);
-            log.info("Firestation at address '{}' with station number {} added successfully.",
-                    fireStation.getAddress(), fireStation.getStation());
-            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-        } catch (FireStationAlreadyExistsException ex) {
-            log.warn("Cannot add firestation at address '{}': already exists.", fireStation.getAddress());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Firestation already exists at this address.");
-        }
+
+        FireStation saved = fireStationService.saveFirestation(fireStation);
+        log.info("Firestation at address '{}' with station number {} added successfully.",
+                fireStation.getAddress(), fireStation.getStation());
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+
     }
 
+    /**
+     * Updates the details of an existing fire station.
+     * <p>
+     * This method receives a FireStation object in the request body, attempts to update the corresponding fire station
+     * in the system, and returns the updated entity upon success.
+     *
+     * @param fireStation the FireStation object containing updated information
+     * @return ResponseEntity containing:
+     * - HTTP 200 OK and the updated FireStation object if the update is successful
+     */
     @PutMapping("/firestation")
     public ResponseEntity<?> updateFireStation(@RequestBody FireStation fireStation) {
-        try {
-            FireStation updated = fireStationService.updateFirestation(fireStation);
-            log.info("Firestation at address '{}' successfully updated to station number {}.",
-                    updated.getAddress(), updated.getStation());
-            return ResponseEntity.ok(updated);
-        } catch (FireStationNotFoundException ex) {
-            log.warn("Cannot update firestation at address '{}': not found.", fireStation.getAddress());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Firestation not found at this address.");
-        }
+
+        FireStation updated = fireStationService.updateFirestation(fireStation);
+        log.info("Firestation at address '{}' successfully updated to station number {}.",
+                updated.getAddress(), updated.getStation());
+        return ResponseEntity.ok(updated);
+
     }
 
+    /**
+     * Deletes an existing fire station identified by its address.
+     * <p>
+     * This method receives the address of the fire station as a request parameter,
+     * attempts to delete the corresponding fire station from the system,
+     * and returns a confirmation message upon success.
+     * <p>
+     * If the fire station is not found, a FireStationNotFoundException is thrown
+     * and handled globally by an exception handler.
+     *
+     * @param address the address of the fire station to delete
+     * @return ResponseEntity containing:
+     *         - HTTP 200 OK and a success message if the fire station was deleted successfully
+     */
     @DeleteMapping("/firestation")
     public ResponseEntity<String> deleteFireStation(@RequestParam String address) {
-        try {
-            fireStationService.deleteFirestationByAddress(address);
-            log.info("Firestation at address '{}' deleted successfully.", address);
-            return ResponseEntity.ok("Firestation at address '" + address + "' deleted successfully.");
-        } catch (FireStationNotFoundException ex) {
-            log.warn("Cannot delete firestation at address '{}': not found.", address);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Firestation not found at address: " + address);
-        }
+
+        fireStationService.deleteFirestationByAddress(address);
+        log.info("Firestation at address '{}' deleted successfully.", address);
+        return ResponseEntity.ok("Firestation at address '" + address + "' deleted successfully.");
+
     }
 
+    /**
+     * Deletes all fire stations associated with a given station number.
+     * <p>
+     * This method receives the station number as a request parameter,
+     * attempts to delete all fire stations matching this station number from the system,
+     * and returns a confirmation message upon success.
+     * <p>
+     * If no fire stations are found with the given station number,
+     * an exception may be thrown and handled globally by an exception handler.
+     *
+     * @param stationNumber the station number for which all fire stations should be deleted
+     * @return ResponseEntity containing:
+     *         - HTTP 200 OK and a success message if the fire stations were deleted successfully
+     */
     @DeleteMapping("/firestations")
     public ResponseEntity<String> deleteFireStationsByStationNumber(@RequestParam int stationNumber) {
-        try {
+
             fireStationService.deleteFirestationsByStationNumber(stationNumber);
             log.info("All firestations with station number {} deleted successfully.", stationNumber);
             return ResponseEntity.ok("All firestations with station number " + stationNumber + " deleted successfully.");
-        } catch (FireStationNotFoundException ex) {
-            log.warn("Cannot delete firestations with station number {}: not found.", stationNumber);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("No firestations found with station number: " + stationNumber);
-        }
+
     }
 
 }
