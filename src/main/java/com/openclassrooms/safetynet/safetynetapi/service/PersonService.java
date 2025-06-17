@@ -1,5 +1,7 @@
 package com.openclassrooms.safetynet.safetynetapi.service;
 
+import com.openclassrooms.safetynet.safetynetapi.dto.ChildDTO;
+import com.openclassrooms.safetynet.safetynetapi.dto.HouseholdMembersDTO;
 import com.openclassrooms.safetynet.safetynetapi.dto.PersonDTO;
 import com.openclassrooms.safetynet.safetynetapi.dto.PersonInfoDto;
 import com.openclassrooms.safetynet.safetynetapi.exception.PersonAlreadyExistsException;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -165,7 +168,7 @@ public class PersonService {
                     person.getFirstName(), person.getLastName());
 
             if (record != null) {
-                int age = AgeUtil.calculateAge(record.getBirthdate()); // à adapter selon ton utilitaire
+                int age = AgeUtil.calculateAge(record.getBirthdate());
                 PersonInfoDto dto = new PersonInfoDto(
                         person.getFirstName(),
                         person.getLastName(),
@@ -182,4 +185,64 @@ public class PersonService {
         return result;
     }
 
+    /**
+     * Retrieves a list of children (aged 18 or under) living at the specified address,
+     * along with their household members.
+     *
+     * <p>For each person found at the address, the method attempts to retrieve their medical record
+     * to determine their age. If the person is 18 years old or younger, they are considered a child.
+     * The result includes their first name, last name, age, and a list of other household members
+     * (excluding the child himself).</p>
+     *
+     * @param address the address to search for children
+     * @return a list of ChildDTO objects representing each child and their household members.
+     * *         Returns an empty list if no residents are found at the address or if no children live there.
+     */
+    public List<ChildDTO> getChildrenByAddress(String address) {
+
+        // 1- Retrieve all persons living at the given address
+        List<Person> personsAtAddress = personRepository.getPersonByAddress(address);
+
+        if (personsAtAddress.isEmpty()) {
+            log.warn("No residents found at address {}", address);
+            return Collections.emptyList();
+        }
+        // 2- For each person:
+        //    -- calculate their age using their medical record
+        //    -- if age ≤ 18 → they are considered a child
+        //    -- add other household members (excluding the child) to the DTO
+        List<ChildDTO> children = new ArrayList<>();
+        for (Person person : personsAtAddress) {
+            MedicalRecord record = medicalRecordRepository.getMedicalRecordByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+            if (record == null) {
+                log.warn("No medical record found for {} {}", person.getFirstName(), person.getLastName());
+                continue;
+            } // No medical record → skip
+            int age = AgeUtil.calculateAge(record.getBirthdate());
+            if (age <= 18) {
+                ChildDTO child = new ChildDTO();
+                child.setFirstName(person.getFirstName());
+                child.setLastName(person.getLastName());
+                child.setAge(age);
+
+                // Household members excluding the child
+                List<HouseholdMembersDTO> otherMembers = personsAtAddress.stream()
+                        .filter(p -> !(p.getFirstName().equalsIgnoreCase(person.getFirstName())
+                                && p.getLastName().equalsIgnoreCase(person.getLastName())))
+                        .map(p -> {
+                            HouseholdMembersDTO dto = new HouseholdMembersDTO();
+                            dto.setFirstName(p.getFirstName());
+                            dto.setLastName(p.getLastName());
+                            return dto;
+                        })
+                        .collect(Collectors.toList());
+
+                child.setHouseholdMembers(otherMembers);
+
+                children.add(child);
+            }
+        }
+        // 3- Return the list of ChildDTO
+        return children;
+    }
 }
