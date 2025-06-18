@@ -1,6 +1,7 @@
 package com.openclassrooms.safetynet.safetynetapi.controller;
 
 import com.openclassrooms.safetynet.safetynetapi.dto.CoveredPersonsByStationDTO;
+import com.openclassrooms.safetynet.safetynetapi.dto.FireStationResidentsDTO;
 import com.openclassrooms.safetynet.safetynetapi.model.FireStation;
 import com.openclassrooms.safetynet.safetynetapi.service.FireStationService;
 import lombok.extern.log4j.Log4j2;
@@ -158,6 +159,29 @@ public class FireStationController {
     @GetMapping("/firestation")
     public ResponseEntity<CoveredPersonsByStationDTO> getPersonsCoveredByStation(@RequestParam("stationNumber") int stationNumber) {
         CoveredPersonsByStationDTO response = fireStationService.getPersonsCoveredByStation(stationNumber);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * GET endpoint that retrieves residents and medical information for a given address.
+     *
+     * <p>This endpoint returns:
+     * <ul>
+     *   <li>The fire station number serving the specified address</li>
+     *   <li>A list of residents living at that address, each including their name, phone number, age,
+     *       medications, and allergies</li>
+     * </ul>
+     *
+     * <p>Example request: <code>/fire?address=1509 Culver St</code></p>
+     * <p>If no fire station is found for the given address, this endpoint will respond with an appropriate HTTP error status.</p>
+     *
+     * @param address the address to look up
+     * @return a ResponseEntity containing a FireStationResidentsDTO with fire station number
+     * and resident details; returns HTTP 200 OK on success
+     */
+    @GetMapping("/fire")
+    public ResponseEntity<FireStationResidentsDTO> getResidentsByAddress(@RequestParam String address) {
+        FireStationResidentsDTO response = fireStationService.getResidentsByAddress(address);
         return ResponseEntity.ok(response);
     }
 

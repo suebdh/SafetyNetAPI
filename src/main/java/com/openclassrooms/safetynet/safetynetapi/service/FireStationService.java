@@ -1,7 +1,6 @@
 package com.openclassrooms.safetynet.safetynetapi.service;
 
-import com.openclassrooms.safetynet.safetynetapi.dto.CoveredPersonsByStationDTO;
-import com.openclassrooms.safetynet.safetynetapi.dto.CoveredPersonsDTO;
+import com.openclassrooms.safetynet.safetynetapi.dto.*;
 import com.openclassrooms.safetynet.safetynetapi.exception.FireStationAlreadyExistsException;
 import com.openclassrooms.safetynet.safetynetapi.exception.FireStationNotFoundException;
 import com.openclassrooms.safetynet.safetynetapi.model.FireStation;
@@ -17,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -234,7 +234,7 @@ public class FireStationService {
      *
      * @param stationNumber the fire station number used to retrieve covered addresses
      * @return a CoveredPersonsByStationDTO containing the list of persons, the number of adults,
-     *         and the number of children
+     * and the number of children
      * @throws FireStationNotFoundException if no addresses are found for the given station number
      */
     public CoveredPersonsByStationDTO getPersonsCoveredByStation(int stationNumber) {
@@ -293,5 +293,72 @@ public class FireStationService {
         responseDTO.setNbAdults(nbAdults);
         responseDTO.setNbChildren(nbChildren);
         return responseDTO;
+    }
+
+    /**
+     * Retrieves detailed information about residents living at a specific address,
+     * including their personal details and medical records, as well as the fire station number covering that address.
+     *
+     * <p>This method performs the following operations:
+     * <ul>
+     *   <li>Finds the fire station assigned to the given address.</li>
+     *   <li>Fetches all persons residing at that address.</li>
+     *   <li>Retrieves each person's age, medications, and allergies using their medical records.</li>
+     *   <li>Builds and returns a FireStationResidentsDTO containing the station number and a list of detailed resident info.</li>
+     * </ul>
+     *
+     * @param address the address for which to retrieve residents and fire station information
+     * @return a FireStationResidentsDTO containing the fire station number and a list of residents with their medical details
+     * @throws FireStationNotFoundException if no fire station is found for the provided address
+     */
+    public FireStationResidentsDTO getResidentsByAddress(String address) {
+
+        //1 - Find the fire station using the address
+        FireStation fireStation = fireStationRepository.getFirestationByAddress(address);
+        if (fireStation == null) {
+            log.warn("No fire station found for address {}", address);
+            throw new FireStationNotFoundException("No fire station found for address: " + address);
+        }
+
+        int stationNumber = fireStation.getStation();
+
+        //2 - Find the residents at the address
+        List<Person> residents = personRepository.getPersonByAddress(address);
+        if (residents.isEmpty()) {
+            log.warn("No residents found at address {}", address);
+            // Option 1: Return a DTO with an empty list
+            return new FireStationResidentsDTO(stationNumber, Collections.emptyList());
+            // Option 2:  throw new PersonNotFoundException("No residents found at address: " + address);
+        }
+
+        //3 - Build the detailed list of residents
+        List<FirePersonInfoDTO> detailedResidents = new ArrayList<>();
+        for (Person person : residents) {
+            MedicalRecord medicalRecord = medicalRecordRepository.getMedicalRecordByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+
+            int age = -1;
+            List<String> medications = Collections.emptyList();
+            List<String> allergies = Collections.emptyList();
+
+            if (medicalRecord != null) {
+                age = AgeUtil.calculateAge(medicalRecord.getBirthdate());
+                medications = medicalRecord.getMedications();
+                allergies = medicalRecord.getAllergies();
+            } else {
+                log.warn("No medical record found for {} {} at fire station number {}", person.getFirstName(), person.getLastName(), stationNumber);
+            }
+
+            FirePersonInfoDTO  infoDto = new FirePersonInfoDTO (
+                    person.getFirstName(),
+                    person.getLastName(),
+                    person.getPhone(),
+                    age,
+                    medications,
+                    allergies
+            );
+            detailedResidents.add(infoDto);
+        }
+        //4 - Return le DTO final
+        return new FireStationResidentsDTO(stationNumber, detailedResidents);
     }
 }
