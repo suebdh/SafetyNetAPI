@@ -5,9 +5,9 @@ import java.time.Period;
 
 public class AgeUtil {
     /**
-     * Calculates the age in years based on the given birth date.
+     * Calculates the age in years based on the given birthdate.
      *
-     * @param birthDate the birth date
+     * @param birthDate the birthdate
      * @return the calculated age in years
      */
     public static int calculateAge(LocalDate birthDate) {
