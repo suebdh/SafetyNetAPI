@@ -1,11 +1,16 @@
 package com.openclassrooms.safetynet.safetynetapi.service;
 
+import com.openclassrooms.safetynet.safetynetapi.dto.CoveredPersonsByStationDTO;
+import com.openclassrooms.safetynet.safetynetapi.dto.CoveredPersonsDTO;
 import com.openclassrooms.safetynet.safetynetapi.exception.FireStationAlreadyExistsException;
 import com.openclassrooms.safetynet.safetynetapi.exception.FireStationNotFoundException;
 import com.openclassrooms.safetynet.safetynetapi.model.FireStation;
+import com.openclassrooms.safetynet.safetynetapi.model.MedicalRecord;
 import com.openclassrooms.safetynet.safetynetapi.model.Person;
 import com.openclassrooms.safetynet.safetynetapi.repository.FireStationRepository;
+import com.openclassrooms.safetynet.safetynetapi.repository.MedicalRecordRepository;
 import com.openclassrooms.safetynet.safetynetapi.repository.PersonRepository;
+import com.openclassrooms.safetynet.safetynetapi.util.AgeUtil;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +38,9 @@ public class FireStationService {
 
     @Autowired
     private FireStationRepository fireStationRepository;
+
+    @Autowired
+    private MedicalRecordRepository medicalRecordRepository;
 
     /**
      * Retrieves all fire stations from the repository.
@@ -214,5 +222,76 @@ public class FireStationService {
         return phoneNumbers;
     }
 
+    /**
+     * Retrieves information about all persons covered by a given fire station number.
+     * <p>
+     * This includes:
+     * <ul>
+     *   <li>All persons living at addresses associated with the fire station</li>
+     *   <li>Counts of adults (age > 18) and children (age ≤ 18)</li>
+     *   <li>A list of basic person information (first name, last name, address, phone)</li>
+     * </ul>
+     *
+     * @param stationNumber the fire station number used to retrieve covered addresses
+     * @return a CoveredPersonsByStationDTO containing the list of persons, the number of adults,
+     *         and the number of children
+     * @throws FireStationNotFoundException if no addresses are found for the given station number
+     */
+    public CoveredPersonsByStationDTO getPersonsCoveredByStation(int stationNumber) {
+        // 1- Find all addresses covered by the given fire station
+        List<FireStation> fireStations = fireStationRepository.getFirestationByStationNumber(stationNumber);
+        List<String> addresses = fireStations.stream()
+                .map(FireStation::getAddress)
+                .distinct()
+                .toList();
 
+        if (addresses.isEmpty()) {
+            log.warn("No addresses found for station number: {}", stationNumber);
+            throw new FireStationNotFoundException("No addresses found for station number: " + stationNumber);
+        }
+
+        // 2- Retrieve all persons living at these addresses
+        List<Person> personsCovered = new ArrayList<>();
+        for (String address : addresses) {
+            personsCovered.addAll(personRepository.getPersonByAddress(address));
+        }
+        log.debug("Found {} persons covered by station number {}", personsCovered.size(), stationNumber);
+
+        // 3- Count adults and children, and build DTO list
+        int nbChildren = 0;
+        int nbAdults = 0;
+        List<CoveredPersonsDTO> dtoList = new ArrayList<>();
+
+        for (Person person : personsCovered) {
+            MedicalRecord record = medicalRecordRepository.getMedicalRecordByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+
+            if (record == null) {
+                log.warn("No medical record found for {} {}", person.getFirstName(), person.getLastName());
+                continue; // Skip person if no medical record
+            }
+            int age = AgeUtil.calculateAge(record.getBirthdate());
+            if (age <= 18) {
+                nbChildren++;
+                log.debug("Incrementing the number of children");
+            } else {
+                nbAdults++;
+                log.debug("Incrementing the number of adults");
+            }
+
+            CoveredPersonsDTO dto = new CoveredPersonsDTO();
+            dto.setFirstName(person.getFirstName());
+            dto.setLastName(person.getLastName());
+            dto.setAddress(person.getAddress());
+            dto.setPhone(person.getPhone());
+            dtoList.add(dto);
+        }
+
+        // 4- Build and return the final response DTO
+
+        CoveredPersonsByStationDTO responseDTO = new CoveredPersonsByStationDTO();
+        responseDTO.setCoveredPersons(dtoList);
+        responseDTO.setNbAdults(nbAdults);
+        responseDTO.setNbChildren(nbChildren);
+        return responseDTO;
+    }
 }

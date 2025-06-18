@@ -1,7 +1,6 @@
 package com.openclassrooms.safetynet.safetynetapi.controller;
 
-import com.openclassrooms.safetynet.safetynetapi.exception.FireStationAlreadyExistsException;
-import com.openclassrooms.safetynet.safetynetapi.exception.FireStationNotFoundException;
+import com.openclassrooms.safetynet.safetynetapi.dto.CoveredPersonsByStationDTO;
 import com.openclassrooms.safetynet.safetynetapi.model.FireStation;
 import com.openclassrooms.safetynet.safetynetapi.service.FireStationService;
 import lombok.extern.log4j.Log4j2;
@@ -26,7 +25,7 @@ public class FireStationController {
      * - HTTP 200 OK and the list of fire stations if any exist,
      * - HTTP 204 No Content if no fire stations are found.
      */
-    @GetMapping("/firestation")
+    @GetMapping("/firestations")
     public ResponseEntity<List<FireStation>> getFirestations() {
         log.info("GET request received for all firestations");
 
@@ -141,6 +140,25 @@ public class FireStationController {
         log.debug("Number of phone numbers found: {}", phoneNumbers.size());
         return ResponseEntity.ok(phoneNumbers);
 
+    }
+
+    /**
+     * GET endpoint that retrieves a list of persons covered by a given fire station number.
+     * <p>
+     * The response includes:
+     * <ul>
+     *     <li>Basic personal information (first name, last name, address, phone)</li>
+     *     <li>The number of adults and children among the listed persons</li>
+     * </ul>
+     *
+     * @param stationNumber the fire station number used to filter addresses and retrieve associated persons
+     * @return a ResponseEntity containing a CoveredPersonsByStationDTO with the list of persons and counts,
+     * or an appropriate HTTP error if no data is found
+     */
+    @GetMapping("/firestation")
+    public ResponseEntity<CoveredPersonsByStationDTO> getPersonsCoveredByStation(@RequestParam("stationNumber") int stationNumber) {
+        CoveredPersonsByStationDTO response = fireStationService.getPersonsCoveredByStation(stationNumber);
+        return ResponseEntity.ok(response);
     }
 
 }
