@@ -15,9 +15,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -324,6 +322,8 @@ public class FireStationService {
 
         //2 - Find the residents at the address
         List<Person> residents = personRepository.getPersonByAddress(address);
+        log.info("{} resident(s) found at address {}", residents.size(), address);
+
         if (residents.isEmpty()) {
             log.warn("No residents found at address {}", address);
             // Option 1: Return a DTO with an empty list
@@ -334,31 +334,83 @@ public class FireStationService {
         //3 - Build the detailed list of residents
         List<FirePersonInfoDTO> detailedResidents = new ArrayList<>();
         for (Person person : residents) {
-            MedicalRecord medicalRecord = medicalRecordRepository.getMedicalRecordByFirstNameAndLastName(person.getFirstName(), person.getLastName());
-
-            int age = -1;
-            List<String> medications = Collections.emptyList();
-            List<String> allergies = Collections.emptyList();
-
-            if (medicalRecord != null) {
-                age = AgeUtil.calculateAge(medicalRecord.getBirthdate());
-                medications = medicalRecord.getMedications();
-                allergies = medicalRecord.getAllergies();
-            } else {
-                log.warn("No medical record found for {} {} at fire station number {}", person.getFirstName(), person.getLastName(), stationNumber);
-            }
-
-            FirePersonInfoDTO  infoDto = new FirePersonInfoDTO (
-                    person.getFirstName(),
-                    person.getLastName(),
-                    person.getPhone(),
-                    age,
-                    medications,
-                    allergies
-            );
+            FirePersonInfoDTO infoDto = buildFirePersonInfoDTO(person);
             detailedResidents.add(infoDto);
         }
+/*
+    List<FirePersonInfoDTO> detailedResidents = residents.stream()
+            .map(this::buildFirePersonInfoDTO)
+            .collect(Collectors.toList());
+        */
         //4 - Return le DTO final
         return new FireStationResidentsDTO(stationNumber, detailedResidents);
+    }
+
+private FirePersonInfoDTO buildFirePersonInfoDTO(Person person){
+    MedicalRecord medicalRecord = medicalRecordRepository.getMedicalRecordByFirstNameAndLastName(person.getFirstName(), person.getLastName());
+
+    int age = -1;
+    List<String> medications = Collections.emptyList();
+    List<String> allergies = Collections.emptyList();
+
+    if (medicalRecord != null) {
+        age = AgeUtil.calculateAge(medicalRecord.getBirthdate());
+        medications = medicalRecord.getMedications();
+        allergies = medicalRecord.getAllergies();
+    } else {
+        log.warn("No medical record found for1 {} {}", person.getFirstName(), person.getLastName());
+    }
+
+    FirePersonInfoDTO infoDto = new FirePersonInfoDTO(
+            person.getFirstName(),
+            person.getLastName(),
+            person.getPhone(),
+            age,
+            medications,
+            allergies
+    );
+    return infoDto;
+}
+
+    /**
+     * Retrieves a list of households (grouped by address) served by the given fire station numbers.
+     *
+     * <p>For each fire station number provided, this method fetches the addresses it covers,
+     * then gathers all residents living at those addresses along with their personal and medical information
+     * (first name, last name, phone, age, medications, and allergies).</p>
+     *
+     * <p>This method is used for the /flood/stations endpoint to support flood-related alerts and preparedness.</p>
+     *
+     * @param stationNumbers the list of fire station numbers to retrieve households for
+     * @return a list of AddressResidentsDTO, each containing an address and the detailed info of its residents
+     */
+    public List<AddressResidentsDTO> getHouseholdsByStations(List<Integer> stationNumbers) {
+        // 1. Retrieve all addresses covered by the requested stations
+        Set<String> addresses = new HashSet<>(); //Set to eliminate duplicated addresses
+        for (Integer stationNumber : stationNumbers) {
+            List<String> addressesForStation = fireStationRepository.getAddressesByStation(stationNumber);
+            addresses.addAll(addressesForStation);
+        }
+
+        // 2. Initialize the result list
+        List<AddressResidentsDTO> result = new ArrayList<>();
+
+        //3. For each address, build the residents with their medical info and add them to the resul
+
+        for (String address : addresses) {
+            List<Person> residents = personRepository.getPersonByAddress(address);
+
+            List<FirePersonInfoDTO> residentDtos = new ArrayList<>();
+            for (Person person : residents) {
+                FirePersonInfoDTO dto = buildFirePersonInfoDTO(person);
+                residentDtos.add(dto);
+            }
+
+            AddressResidentsDTO addressResidentsDTO = new AddressResidentsDTO(address, residentDtos);
+            result.add(addressResidentsDTO);
+        }
+
+        // 4. Return the complete list
+        return result;
     }
 }
