@@ -1,5 +1,6 @@
 package com.openclassrooms.safetynet.safetynetapi.controller;
 
+import com.openclassrooms.safetynet.safetynetapi.dto.AddressResidentsDTO;
 import com.openclassrooms.safetynet.safetynetapi.dto.CoveredPersonsByStationDTO;
 import com.openclassrooms.safetynet.safetynetapi.dto.FireStationResidentsDTO;
 import com.openclassrooms.safetynet.safetynetapi.model.FireStation;
@@ -182,6 +183,25 @@ public class FireStationController {
     @GetMapping("/fire")
     public ResponseEntity<FireStationResidentsDTO> getResidentsByAddress(@RequestParam String address) {
         FireStationResidentsDTO response = fireStationService.getResidentsByAddress(address);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Retrieves a list of households covered by the specified fire stations.
+     *
+     * <p>This endpoint is used in case of flooding to identify all households served by
+     * one or more fire stations. For each address, it returns the list of residents living
+     * there along with their personal and medical information (name, phone, age, medications, allergies).</p>
+     *
+     * <p>Example request: <code>/flood/stations?stations=1,2</code></p>
+     *
+     * @param stations the list of fire station numbers
+     * @return a ResponseEntity containing a list of AddressResidentsDTO,
+     *         each representing an address and its residents with medical details
+     */
+    @GetMapping("/flood/stations")
+    public ResponseEntity<List<AddressResidentsDTO>> getHouseholdsByStations(@RequestParam("stations") List<Integer> stations){
+        List<AddressResidentsDTO> response = fireStationService.getHouseholdsByStations(stations);
         return ResponseEntity.ok(response);
     }
 

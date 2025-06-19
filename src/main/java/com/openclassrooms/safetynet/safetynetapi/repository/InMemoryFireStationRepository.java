@@ -201,4 +201,16 @@ public class InMemoryFireStationRepository implements FireStationRepository {
         }
         return removed;
     }
+
+    @Override
+    public List<String> getAddressesByStation(Integer stationNumber) {
+        List<String> addresses = getFirestations().stream()
+                .filter(fs -> fs.getStation() == stationNumber)
+                .map(FireStation::getAddress)
+                .toList();
+
+        log.debug("Found {} address(es) for station number {}", addresses.size(), stationNumber);
+        return addresses;
+    }
+
 }

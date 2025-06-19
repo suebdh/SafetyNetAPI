@@ -23,4 +23,5 @@ public interface FireStationRepository {
 
     boolean deleteByStationNumber(int stationNumber);
 
+    List<String> getAddressesByStation(Integer stationNumber);
 }
