@@ -25,19 +25,30 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
      */
     @PostConstruct
     public void init() {
-        this.medicalRecords = new ArrayList<>(dataLoader.getDataFile().getMedicalrecords());
+        this.medicalRecords = new ArrayList<>(dataLoader.getDataFile().getMedicalRecords());
         log.debug("Medical records loaded: {}", medicalRecords.size());
+    }
+
+    /**
+     * Updates the DataFile with the current list of medical records and saves changes to the JSON file.
+     */
+    private void persistChanges() {
+        // Update the source DataFile
+        dataLoader.getDataFile().setMedicalRecords(medicalRecords);
+        // Persist changes to the JSON file
+        dataLoader.saveJsonFile();
     }
 
     /**
      * Retrieves all medical records stored in memory.
      *
-     * @return a list of all MedicalRecord objects; never null but can be empty
+     * @return a list of all MedicalRecord objects; never null but can be empty.
+     *         The returned list is a copy and modifications on it won't affect the internal list.
      */
     @Override
     public List<MedicalRecord> getAllMedicalRecords() {
         log.debug("Fetching all medical records. Total: {}", medicalRecords.size());
-        return medicalRecords;
+        return new ArrayList<>(medicalRecords);
     }
 
     /**
@@ -59,7 +70,7 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
 
         if (!results.isEmpty()) {
             log.debug("Medical record found for {} {}", firstName, lastName);
-            return results.get(0); // On retourne le premier trouvé
+            return results.getFirst(); // We return the first one found
         } else {
             log.debug("No medical record found for {} {}", firstName, lastName);
             return null;
@@ -67,13 +78,13 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
     }
 
     /**
-     * Adds a new medical record to the in-memory list, updates the main data file,
-     * and persists the changes to the external JSON file.
+     * Adds a new medical record to the in-memory list, updates the main data file, and persists the changes to the external JSON file.
      *
      * @param medicalRecord the medical record to be saved
      */
     @Override
-    public void saveMedicalRecord(MedicalRecord medicalRecord) {
+    public MedicalRecord saveMedicalRecord(MedicalRecord medicalRecord) {
+
         medicalRecords.add(medicalRecord);
         log.debug("Medical record for {} {} saved with birthdate {}, medications {}, and allergies {}",
                 medicalRecord.getFirstName(),
@@ -82,11 +93,9 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
                 medicalRecord.getMedications(),
                 medicalRecord.getAllergies());
 
-        // Update the source DataFile
-        dataLoader.getDataFile().setMedicalrecords(medicalRecords);
+        persistChanges();
 
-        // Persist changes to the JSON file
-        dataLoader.saveJsonFile();
+        return medicalRecord;
     }
 
     /**
@@ -116,11 +125,7 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
                         mr.getMedications(),
                         mr.getAllergies());
 
-                // Update the source DataFile
-                dataLoader.getDataFile().setMedicalrecords(medicalRecords);
-
-                // Persist changes to the JSON file
-                dataLoader.saveJsonFile();
+                persistChanges();
 
                 return mr;
             }
@@ -150,11 +155,7 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
         if (removed) {
             log.debug("Medical record for {} {} deleted", firstName, lastName);
 
-            // Update the source DataFile
-            dataLoader.getDataFile().setMedicalrecords(medicalRecords);
-
-            // Persist changes to the JSON file
-            dataLoader.saveJsonFile();
+            persistChanges();
         } else {
             log.debug("No medical record found for {} {}, nothing deleted", firstName, lastName);
         }

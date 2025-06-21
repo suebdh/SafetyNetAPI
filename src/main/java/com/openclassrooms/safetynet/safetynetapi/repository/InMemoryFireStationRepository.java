@@ -27,7 +27,7 @@ public class InMemoryFireStationRepository implements FireStationRepository {
      */
     @PostConstruct
     public void init() {
-        fireStations = new ArrayList<>(dataLoader.getDataFile().getFirestations());
+        fireStations = new ArrayList<>(dataLoader.getDataFile().getFireStations());
         log.debug("Fire Stations loaded: {}", fireStations.size());
     }
 
@@ -37,7 +37,7 @@ public class InMemoryFireStationRepository implements FireStationRepository {
      * @return a list of all FireStation objects; never null but can be empty
      */
     @Override
-    public List<FireStation> getFirestations() {
+    public List<FireStation> getFireStations() {
         log.debug("Fetching all fire stations. Total: {}", fireStations.size());
         return fireStations;
     }
@@ -49,12 +49,12 @@ public class InMemoryFireStationRepository implements FireStationRepository {
      * @return a list of FireStation objects with the specified station number; never null but possibly empty
      */
     @Override
-    public List<FireStation> getFirestationByStationNumber(int station) {
-        List<FireStation> firestations = getFirestations().stream()
+    public List<FireStation> getFireStationByStationNumber(int station) {
+        List<FireStation> fireStations = getFireStations().stream()
                 .filter(fs -> fs.getStation() == station)
                 .toList();
-        log.debug("Found {} firestation(s) with station number {}", firestations.size(), station);
-        return firestations;
+        log.debug("Found {} firestation(s) with station number {}", fireStations.size(), station);
+        return fireStations;
     }
 
     /**
@@ -64,13 +64,13 @@ public class InMemoryFireStationRepository implements FireStationRepository {
      * @return the FireStation object with the specified address, or null if none is found
      */
     @Override
-    public FireStation getFirestationByAddress(String address) {
-        FireStation firestation = getFirestations().stream()
+    public FireStation getFireStationByAddress(String address) {
+        FireStation fireStation = getFireStations().stream()
                 .filter(fs -> fs.getAddress().equalsIgnoreCase(address))
                 .findFirst()
                 .orElse(null);
-        log.debug("Firestation with address '{}' was {}", address, firestation != null ? "found" : "not found");
-        return firestation;
+        log.debug("FireStation with address '{}' was {}", address, fireStation != null ? "found" : "not found");
+        return fireStation;
     }
 
     /**
@@ -80,12 +80,12 @@ public class InMemoryFireStationRepository implements FireStationRepository {
      * @param fireStation the fire station to be saved
      */
     @Override
-    public void saveFirestation(FireStation fireStation) {
+    public void saveFireStation(FireStation fireStation) {
         fireStations.add(fireStation);
-        log.debug("Firestation with address '{}' and station number {} saved", fireStation.getAddress(), fireStation.getStation());
+        log.debug("FireStation with address '{}' and station number {} saved", fireStation.getAddress(), fireStation.getStation());
 
         // Update the source DataFile
-        dataLoader.getDataFile().setFirestations(fireStations);
+        dataLoader.getDataFile().setFireStations(fireStations);
 
         // Persist changes to the JSON file
         dataLoader.saveJsonFile();
@@ -102,14 +102,14 @@ public class InMemoryFireStationRepository implements FireStationRepository {
      * @return the updated FireStation if found and updated; otherwise, returns null
      */
     @Override
-    public FireStation updateFirestation(FireStation fireStation) {
+    public FireStation updateFireStation(FireStation fireStation) {
         for (FireStation fs : fireStations) {
             if (fs.getAddress().equalsIgnoreCase(fireStation.getAddress())) {
                 fs.setStation(fireStation.getStation());
-                log.debug("Firestation at address '{}' updated with station number {}", fs.getAddress(), fs.getStation());
+                log.debug("FireStation at address '{}' updated with station number {}", fs.getAddress(), fs.getStation());
 
                 // Update the source DataFile
-                dataLoader.getDataFile().setFirestations(fireStations);
+                dataLoader.getDataFile().setFireStations(fireStations);
 
                 // Persist changes to the JSON file
                 dataLoader.saveJsonFile();
@@ -133,16 +133,16 @@ public class InMemoryFireStationRepository implements FireStationRepository {
      * @return true if a fire station was found and deleted; false otherwise
      */
     @Override
-    public boolean deleteFirstOccurrenceFirestationByAddress(String address) {
+    public boolean deleteFirstOccurrenceFireStationByAddress(String address) {
         Iterator<FireStation> iterator = fireStations.iterator();
         while (iterator.hasNext()) {
             FireStation fs = iterator.next();
             if (fs.getAddress().equalsIgnoreCase(address)) {
                 iterator.remove();
-                log.debug("The first occurence of Firestation with address '{}' deleted", address);
+                log.debug("The first occurence of FireStation with address '{}' deleted", address);
 
                 // Update source DataFile and save JSON
-                dataLoader.getDataFile().setFirestations(fireStations);
+                dataLoader.getDataFile().setFireStations(fireStations);
                 dataLoader.saveJsonFile();
 
                 return true; // Deletion performed
@@ -163,13 +163,13 @@ public class InMemoryFireStationRepository implements FireStationRepository {
      * @return true if one or more fire stations were found and deleted; false otherwise
      */
     @Override
-    public boolean deleteAllFirestationByAddress(String address) {
+    public boolean deleteAllFireStationByAddress(String address) {
         boolean removed = fireStations.removeIf(fs -> fs.getAddress().equalsIgnoreCase(address));
         if (removed) {
             log.debug("All firestations with address '{}' deleted", address);
 
             // Update source DataFile and save JSON
-            dataLoader.getDataFile().setFirestations(fireStations);
+            dataLoader.getDataFile().setFireStations(fireStations);
             dataLoader.saveJsonFile();
         } else {
             log.debug("No firestation at all found with address '{}', nothing deleted", address);
@@ -194,7 +194,7 @@ public class InMemoryFireStationRepository implements FireStationRepository {
             log.debug("All firestations with station number {} deleted", stationNumber);
 
             // Update source DataFile and save JSON
-            dataLoader.getDataFile().setFirestations(fireStations);
+            dataLoader.getDataFile().setFireStations(fireStations);
             dataLoader.saveJsonFile();
         } else {
             log.debug("No firestations with station number {} found, nothing deleted", stationNumber);
@@ -204,7 +204,7 @@ public class InMemoryFireStationRepository implements FireStationRepository {
 
     @Override
     public List<String> getAddressesByStation(Integer stationNumber) {
-        List<String> addresses = getFirestations().stream()
+        List<String> addresses = getFireStations().stream()
                 .filter(fs -> fs.getStation() == stationNumber)
                 .map(FireStation::getAddress)
                 .toList();

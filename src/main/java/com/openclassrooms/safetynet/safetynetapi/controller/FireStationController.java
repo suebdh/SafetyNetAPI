@@ -28,7 +28,7 @@ public class FireStationController {
      * - HTTP 204 No Content if no fire stations are found.
      */
     @GetMapping("/firestations")
-    public ResponseEntity<List<FireStation>> getFirestations() {
+    public ResponseEntity<List<FireStation>> getFireStations() {
         log.info("GET request received for all firestations");
 
         List<FireStation> fireStations = fireStationService.getAllFireStations();
@@ -52,8 +52,8 @@ public class FireStationController {
     @PostMapping("/firestation")
     public ResponseEntity<?> addFireStation(@RequestBody FireStation fireStation) {
 
-        FireStation saved = fireStationService.saveFirestation(fireStation);
-        log.info("Firestation at address '{}' with station number {} added successfully.",
+        FireStation saved = fireStationService.saveFireStation(fireStation);
+        log.info("FireStation at address '{}' with station number {} added successfully.",
                 fireStation.getAddress(), fireStation.getStation());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
 
@@ -72,8 +72,8 @@ public class FireStationController {
     @PutMapping("/firestation")
     public ResponseEntity<?> updateFireStation(@RequestBody FireStation fireStation) {
 
-        FireStation updated = fireStationService.updateFirestation(fireStation);
-        log.info("Firestation at address '{}' successfully updated to station number {}.",
+        FireStation updated = fireStationService.updateFireStation(fireStation);
+        log.info("FireStation at address '{}' successfully updated to station number {}.",
                 updated.getAddress(), updated.getStation());
         return ResponseEntity.ok(updated);
 
@@ -96,9 +96,9 @@ public class FireStationController {
     @DeleteMapping("/firestation")
     public ResponseEntity<String> deleteFireStation(@RequestParam String address) {
 
-        fireStationService.deleteFirestationByAddress(address);
-        log.info("Firestation at address '{}' deleted successfully.", address);
-        return ResponseEntity.ok("Firestation at address '" + address + "' deleted successfully.");
+        fireStationService.deleteFireStationByAddress(address);
+        log.info("FireStation at address '{}' deleted successfully.", address);
+        return ResponseEntity.ok("FireStation at address '" + address + "' deleted successfully.");
 
     }
 
@@ -119,7 +119,7 @@ public class FireStationController {
     @DeleteMapping("/firestations")
     public ResponseEntity<String> deleteFireStationsByStationNumber(@RequestParam int stationNumber) {
 
-        fireStationService.deleteFirestationsByStationNumber(stationNumber);
+        fireStationService.deleteFireStationsByStationNumber(stationNumber);
         log.info("All firestations with station number {} deleted successfully.", stationNumber);
         return ResponseEntity.ok("All firestations with station number " + stationNumber + " deleted successfully.");
 

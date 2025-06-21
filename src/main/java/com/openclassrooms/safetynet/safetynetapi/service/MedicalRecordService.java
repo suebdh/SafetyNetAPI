@@ -1,9 +1,11 @@
 package com.openclassrooms.safetynet.safetynetapi.service;
 
+import com.openclassrooms.safetynet.safetynetapi.dto.MedicalRecordDTO;
 import com.openclassrooms.safetynet.safetynetapi.exception.MedicalRecordAlreadyExistsException;
 import com.openclassrooms.safetynet.safetynetapi.exception.MedicalRecordNotFoundException;
 import com.openclassrooms.safetynet.safetynetapi.model.MedicalRecord;
 import com.openclassrooms.safetynet.safetynetapi.repository.MedicalRecordRepository;
+import com.openclassrooms.safetynet.safetynetapi.service.mapper.MedicalRecordMapper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,15 +27,20 @@ public class MedicalRecordService {
     @Autowired
     private MedicalRecordRepository medicalRecordRepository;
 
+    @Autowired
+    private MedicalRecordMapper medicalRecordMapper;
+
     /**
      * Retrieves all medical records from the repository.
      *
      * @return a list of all MedicalRecord objects currently stored
      */
-    public List<MedicalRecord> getAllMedicalRecords() {
+    public List<MedicalRecordDTO> getAllMedicalRecords() {
         List<MedicalRecord> records = medicalRecordRepository.getAllMedicalRecords();
         log.info("Retrieved {} medical records", records.size());
-        return records;
+        return records.stream()
+                .map(medicalRecordMapper::toDTO)
+                .toList();
     }
 
     /**
@@ -41,82 +48,79 @@ public class MedicalRecordService {
      *
      * @param firstName the first name of the person whose medical record is requested
      * @param lastName  the last name of the person whose medical record is requested
-     * @return the MedicalRecord object if found, or null if no matching record exists
+     * @return the MedicalRecordDTO object if found, or null if no matching record exists
      */
-    public MedicalRecord getMedicalRecordByFirstNameAndLastName(String firstName, String lastName) {
+    public MedicalRecordDTO getMedicalRecordByFirstNameAndLastName(String firstName, String lastName) {
         log.info("Request received to find medical record for: {} {}", firstName, lastName);
 
         MedicalRecord record = medicalRecordRepository.getMedicalRecordByFirstNameAndLastName(firstName, lastName);
 
         if (record != null) {
             log.info("Medical record found for {} {}", firstName, lastName);
+            return medicalRecordMapper.toDTO(record);
         } else {
             log.error("No medical record found for {} {}", firstName, lastName);
+            throw new MedicalRecordNotFoundException("No medical record found for: " + firstName + " " + lastName);
         }
 
-        return record;
     }
-
+    
     /**
      * Saves a new medical record in the system.
      *
-     * <p>Before saving, checks if a medical record already exists for the given first and last name.
-     * If a record exists, throws a MedicalRecordAlreadyExistsException.</p>
-     *
-     * @param medicalRecord the MedicalRecord object to be saved
-     * @return the saved MedicalRecord object
+     * @param medicalRecordDTO the MedicalRecordDTO to be saved
+     * @return the saved MedicalRecordDTO
      * @throws MedicalRecordAlreadyExistsException if a medical record already exists for the given person
      */
-    public MedicalRecord saveMedicalRecord(MedicalRecord medicalRecord) {
+    public MedicalRecordDTO saveMedicalRecord(MedicalRecordDTO medicalRecordDTO) {
         log.info("Request received to save medical record for {} {}",
-                medicalRecord.getFirstName(), medicalRecord.getLastName());
+                medicalRecordDTO.getFirstName(), medicalRecordDTO.getLastName());
 
         MedicalRecord existing = medicalRecordRepository.getMedicalRecordByFirstNameAndLastName(
-                medicalRecord.getFirstName(), medicalRecord.getLastName());
+                medicalRecordDTO.getFirstName(), medicalRecordDTO.getLastName());
 
         if (existing != null) {
             log.error("Medical record already exists for {} {}",
-                    medicalRecord.getFirstName(), medicalRecord.getLastName());
+                    medicalRecordDTO.getFirstName(), medicalRecordDTO.getLastName());
             throw new MedicalRecordAlreadyExistsException(
                     "Medical record already exists for " +
-                            medicalRecord.getFirstName() + " " + medicalRecord.getLastName());
+                            medicalRecordDTO.getFirstName() + " " + medicalRecordDTO.getLastName());
         }
 
-        medicalRecordRepository.saveMedicalRecord(medicalRecord);
+        MedicalRecord medicalRecordEntity = medicalRecordMapper.toEntity(medicalRecordDTO);
+        MedicalRecord updated = medicalRecordRepository.saveMedicalRecord(medicalRecordEntity);
 
         log.info("Medical record successfully saved for {} {} with birthdate {}, medications {}, and allergies {}",
-                medicalRecord.getFirstName(),
-                medicalRecord.getLastName(),
-                medicalRecord.getBirthdate(),
-                medicalRecord.getMedications(),
-                medicalRecord.getAllergies());
+                medicalRecordDTO.getFirstName(),
+                medicalRecordDTO.getLastName(),
+                medicalRecordDTO.getBirthdate(),
+                medicalRecordDTO.getMedications(),
+                medicalRecordDTO.getAllergies());
 
-        return medicalRecord;
+        return medicalRecordMapper.toDTO(updated);
     }
 
     /**
      * Updates an existing medical record in the system.
      *
-     * <p>Attempts to update the medical record with the given information.
-     * If no matching medical record is found, a MedicalRecordNotFoundException is thrown.</p>
-     *
-     * @param medicalRecord the MedicalRecord object containing updated data
-     * @return the updated MedicalRecord object
+     * @param medicalRecordDTO the MedicalRecordDTO containing updated data
+     * @return the updated medicalRecordDTO object
      * @throws MedicalRecordNotFoundException if the medical record to update does not exist
      */
-    public MedicalRecord updateMedicalRecord(MedicalRecord medicalRecord) {
-        log.info("Request received to update medical record for {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName());
+    public MedicalRecordDTO  updateMedicalRecord(MedicalRecordDTO medicalRecordDTO) {
+        log.info("Request received to update medical record for {} {}", medicalRecordDTO.getFirstName(), medicalRecordDTO.getLastName());
 
-        MedicalRecord updated = medicalRecordRepository.updateMedicalRecord(medicalRecord);
+        MedicalRecord medicalRecordEntity = medicalRecordMapper.toEntity(medicalRecordDTO);
+        MedicalRecord updated = medicalRecordRepository.updateMedicalRecord(medicalRecordEntity);
 
         if (updated == null) {
-            log.error("No medical record found for {} {}, cannot update", medicalRecord.getFirstName(), medicalRecord.getLastName());
+            log.error("No medical record found for {} {}, cannot update", medicalRecordDTO.getFirstName(), medicalRecordDTO.getLastName());
             throw new MedicalRecordNotFoundException("No medical record found for: " +
-                    medicalRecord.getFirstName() + " " + medicalRecord.getLastName());
+                    medicalRecordDTO.getFirstName() + " " + medicalRecordDTO.getLastName());
         }
 
         log.info("Medical record for {} {} updated successfully", updated.getFirstName(), updated.getLastName());
-        return updated;
+        return medicalRecordMapper.toDTO(updated);
     }
 
     /**
