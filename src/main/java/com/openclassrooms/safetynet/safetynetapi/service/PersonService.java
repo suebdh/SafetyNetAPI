@@ -136,19 +136,7 @@ public class PersonService {
         personRepository.deleteFirstOccurrence(firstName, lastName);
     }
 
-    /**
-     * Retrieves a list of unique email addresses of all persons living in the specified city.
-     * <p>
-     * This method filters persons by city, extracts their emails, and removes duplicates.
-     * </p>
-     *
-     * @param city the name of the city for which to retrieve email addresses
-     * @return a list of distinct email addresses of residents in the given city
-     */
-    public List<String> getEmailsByCity(String city) {
-        List<Person> persons = personRepository.findByCity(city);
-        return persons.stream().map(Person::getEmail).distinct().collect(Collectors.toList());
-    }
+
 
     /**
      * Retrieves a list of PersonInfoDto objects for all persons matching the given last name.
