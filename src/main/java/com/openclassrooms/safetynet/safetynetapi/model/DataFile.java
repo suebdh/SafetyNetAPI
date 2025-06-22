@@ -1,5 +1,6 @@
 package com.openclassrooms.safetynet.safetynetapi.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -12,6 +13,8 @@ import java.util.List;
 @Data
 public class DataFile {
     private List<Person> persons;
-    private List <FireStation> fireStations;
+    @JsonProperty("firestations")
+    private List<FireStation> fireStations;
+    @JsonProperty("medicalrecords")
     private List<MedicalRecord> medicalRecords;
 }
