@@ -233,4 +233,18 @@ public class InMemoryPersonRepository implements PersonRepository {
             log.debug("No person found for {} {}, deletion skipped", firstName, lastName);
         }
     }
+
+    /**
+     * Retrieves all persons living in the specified city.
+     *
+     * @param city the city name to filter by (case-insensitive)
+     * @return a list of persons residing in the given city; empty list if none found
+     */
+    @Override
+    public List<Person> findByCity(String city) {
+        String trimmedCity = city.trim().replaceAll("\\s+", " ");
+        return persons.stream()
+                .filter(person -> person.getCity().equalsIgnoreCase(trimmedCity))
+                .collect(Collectors.toList());
+    }
 }

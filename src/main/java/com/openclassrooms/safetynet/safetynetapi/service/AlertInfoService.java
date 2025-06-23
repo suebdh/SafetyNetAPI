@@ -5,7 +5,6 @@ import com.openclassrooms.safetynet.safetynetapi.exception.FireStationNotFoundEx
 import com.openclassrooms.safetynet.safetynetapi.model.FireStation;
 import com.openclassrooms.safetynet.safetynetapi.model.MedicalRecord;
 import com.openclassrooms.safetynet.safetynetapi.model.Person;
-import com.openclassrooms.safetynet.safetynetapi.repository.AlertInfoInterfaceRepository;
 import com.openclassrooms.safetynet.safetynetapi.repository.FireStationRepository;
 import com.openclassrooms.safetynet.safetynetapi.repository.MedicalRecordRepository;
 import com.openclassrooms.safetynet.safetynetapi.repository.PersonRepository;
@@ -20,9 +19,6 @@ import java.util.stream.Collectors;
 @Log4j2
 @Service
 public class AlertInfoService {
-
-    @Autowired
-    private AlertInfoInterfaceRepository alertInfoInterfaceRepository;
 
     @Autowired
     private PersonRepository personRepository;
@@ -43,7 +39,7 @@ public class AlertInfoService {
      * @return a list of distinct email addresses of residents in the given city
      */
     public List<String> getEmailsByCity(String city) {
-        List<Person> persons = alertInfoInterfaceRepository.findByCity(city);
+        List<Person> persons = personRepository.findByCity(city);
         return persons.stream().map(Person::getEmail).distinct().collect(Collectors.toList());
     }
 
