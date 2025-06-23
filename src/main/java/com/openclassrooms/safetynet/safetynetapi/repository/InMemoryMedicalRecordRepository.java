@@ -63,9 +63,11 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
      */
     @Override
     public MedicalRecord getMedicalRecordByFirstNameAndLastName(String firstName, String lastName) {
+        String trimmedFirstName = firstName.trim();
+        String trimmedLastName = lastName.trim();
         List<MedicalRecord> results = medicalRecords.stream()
-                .filter(mr -> mr.getFirstName().equalsIgnoreCase(firstName)
-                        && mr.getLastName().equalsIgnoreCase(lastName))
+                .filter(mr -> mr.getFirstName().equalsIgnoreCase(trimmedFirstName)
+                        && mr.getLastName().equalsIgnoreCase(trimmedLastName))
                 .toList();
 
         if (!results.isEmpty()) {

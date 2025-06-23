@@ -191,8 +191,9 @@ public class InMemoryPersonRepository implements PersonRepository {
      */
     @Override
     public List<Person> findByLastName(String lastName) {
+        String trimmedLastName = lastName.trim();
         return persons.stream().
-                filter(person -> person.getLastName().equalsIgnoreCase(lastName))
+                filter(person -> person.getLastName().equalsIgnoreCase(trimmedLastName))
                 .collect(Collectors.toList());
     }
 

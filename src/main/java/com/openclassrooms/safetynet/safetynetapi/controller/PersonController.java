@@ -2,7 +2,6 @@ package com.openclassrooms.safetynet.safetynetapi.controller;
 
 import com.openclassrooms.safetynet.safetynetapi.dto.ChildDTO;
 import com.openclassrooms.safetynet.safetynetapi.dto.PersonDTO;
-import com.openclassrooms.safetynet.safetynetapi.dto.PersonInfoDto;
 import com.openclassrooms.safetynet.safetynetapi.service.PersonService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,28 +107,7 @@ public class PersonController {
     }
 
 
-    /**
-     * Handles GET requests to retrieve personal information filtered by last name.
-     *
-     * @param lastName the last name used to filter persons
-     * @return ResponseEntity containing:
-     * - HTTP 200 OK and a list of PersonInfoDto if matching persons are found,
-     * - HTTP 404 Not Found if no persons match the provided last name
-     */
-    @GetMapping("/personInfo")
-    public ResponseEntity<List<PersonInfoDto>> getPersonInfo(@RequestParam String lastName) {
-        log.info("Request received for /personInfo with lastName: {}", lastName);
-        List<PersonInfoDto> result = personService.getPersonInfoByLastName(lastName);
 
-        if (result.isEmpty()) {
-            log.warn("No persons found with lastName: {}", lastName);
-            return ResponseEntity.notFound().build();
-        }
-
-        log.info("{} person(s) found with lastName '{}'", result.size(), lastName);
-        return ResponseEntity.ok(result);
-
-    }
 
     /**
      * Handles GET requests to retrieve a list of children living at a specified address.
