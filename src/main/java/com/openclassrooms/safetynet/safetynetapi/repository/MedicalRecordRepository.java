@@ -12,7 +12,7 @@ public interface MedicalRecordRepository {
 
     MedicalRecord getMedicalRecordByFirstNameAndLastName(String firstName, String lastName);
 
-    void saveMedicalRecord(MedicalRecord medicalRecord);
+    MedicalRecord saveMedicalRecord(MedicalRecord medicalRecord);
 
     MedicalRecord updateMedicalRecord(MedicalRecord medicalRecord);
 

@@ -1,14 +1,14 @@
 package com.openclassrooms.safetynet.safetynetapi.controller;
 
-import com.openclassrooms.safetynet.safetynetapi.dto.ChildDTO;
 import com.openclassrooms.safetynet.safetynetapi.dto.PersonDTO;
-import com.openclassrooms.safetynet.safetynetapi.dto.PersonInfoDto;
 import com.openclassrooms.safetynet.safetynetapi.service.PersonService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.openclassrooms.safetynet.safetynetapi.exception.PersonNotFoundException;
+import com.openclassrooms.safetynet.safetynetapi.exception.PersonAlreadyExistsException;
 
 import java.util.List;
 
@@ -27,13 +27,22 @@ public class PersonController {
     private PersonService personService;
 
     /**
-     * Retrieves the list of all persons.
+     * Handles HTTP GET requests to retrieve all persons in the system.
      *
-     * @return List of PersonDTO objects representing all persons in the system.
+     * <p>This endpoint delegates to the service layer to obtain a list of PersonDTO objects,
+     * then returns them wrapped in a ResponseEntity with HTTP status 200 (OK).</p>
+     *
+     * <p>Logs are generated on request reception and before returning the response,
+     * including the count of persons returned.</p>
+     *
+     * @return ResponseEntity containing the list of all PersonDTO objects and HTTP status 200 OK
      */
     @GetMapping("/persons")
-    public List<PersonDTO> getAllPersons() {
-        return personService.getAllPersons();
+    public ResponseEntity<List<PersonDTO>> getAllPersons() {
+        log.info("GET request received for all persons");
+        List<PersonDTO> personDTOs = personService.getAllPersons();
+        log.info("Returning {} person(s)", personDTOs.size());
+        return ResponseEntity.ok(personDTOs);
     }
 
     /**
@@ -54,14 +63,17 @@ public class PersonController {
      * Adds a new person to the system.
      * <p>
      * Receives a PersonDTO in the request body, saves it via the service layer, and returns the saved person with HTTP status 201 Created.
+     * </p>
      * <p>
      * If the person already exists, a PersonAlreadyExistsException will be thrown and handled globally.
+     * </p>
      *
      * @param personDTO the data of the person to add
      * @return a ResponseEntity with status 201 Created and the saved person in the body
+     * @throws PersonAlreadyExistsException if the person already exists in the system
      */
     @PostMapping("/person")
-    public ResponseEntity<?> addPerson(@RequestBody PersonDTO personDTO) {
+    public ResponseEntity<PersonDTO> addPerson(@RequestBody PersonDTO personDTO) {
         PersonDTO saved = personService.save(personDTO);
         log.info("Person {} {} added successfully.", saved.getFirstName(), saved.getLastName());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
@@ -70,15 +82,17 @@ public class PersonController {
     /**
      * Updates an existing person's information.
      * <p>
-     * Receives a PersonDTO in the request body, updates it via the service layer, and returns the updated person with HTTP status 200 OK.
+     * Receives a PersonDTO in the request body, updates it via the service layer, and returns
+     * the updated person with HTTP status 200 OK.
      * If the person does not exist, a PersonNotFoundException will be thrown and handled globally.
      * </p>
      *
      * @param personDTO the data of the person to update
-     * @return a ResponseEntity with status 200 OK and the updated person in the body
+     * @return a ResponseEntity with status 200 OK and the updated PersonDTO in the body
+     * @throws PersonNotFoundException if the person to update is not found
      */
     @PutMapping("/person")
-    public ResponseEntity<?> updatePerson(@RequestBody PersonDTO personDTO) {
+    public ResponseEntity<PersonDTO> updatePerson(@RequestBody PersonDTO personDTO) {
         PersonDTO updated = personService.update(personDTO);
         log.info("Person {} {} updated successfully.", updated.getFirstName(), updated.getLastName());
         return ResponseEntity.ok(updated);
@@ -91,72 +105,4 @@ public class PersonController {
         return ResponseEntity.ok("Person " + firstName + " " + lastName + " deleted successfully.");
     }
 
-    /**
-     * Retrieves the list of email addresses for all persons residing in the specified city.
-     *
-     * @param city the name of the city for which to retrieve community emails
-     * @return a ResponseEntity containing:
-     * - HTTP 200 OK and a list of emails if any are found,
-     * - HTTP 204 No Content if no emails are found for the city
-     */
-    @GetMapping("/communityEmail")
-    public ResponseEntity<List<String>> getCommunityEmails(@RequestParam String city) {
-        List<String> emails = personService.getEmailsByCity(city);
-        if (emails.isEmpty()) {
-            log.info("No email found for city {}", city);
-            return ResponseEntity.noContent().build();
-        } else {
-            log.info("Found {} email(s) for city {}", emails.size(), city);
-            return ResponseEntity.ok(emails);
-        }
-    }
-
-    /**
-     * Handles GET requests to retrieve personal information filtered by last name.
-     *
-     * @param lastName the last name used to filter persons
-     * @return ResponseEntity containing:
-     * - HTTP 200 OK and a list of PersonInfoDto if matching persons are found,
-     * - HTTP 404 Not Found if no persons match the provided last name
-     */
-    @GetMapping("/personInfo")
-    public ResponseEntity<List<PersonInfoDto>> getPersonInfo(@RequestParam String lastName) {
-        log.info("Request received for /personInfo with lastName: {}", lastName);
-        List<PersonInfoDto> result = personService.getPersonInfoByLastName(lastName);
-
-        if (result.isEmpty()) {
-            log.warn("No persons found with lastName: {}", lastName);
-            return ResponseEntity.notFound().build();
-        }
-
-        log.info("{} person(s) found with lastName '{}'", result.size(), lastName);
-        return ResponseEntity.ok(result);
-
-    }
-
-    /**
-     * Handles GET requests to retrieve a list of children living at a specified address.
-     *
-     * <p>Expects a query parameter "address" representing the address to search.
-     * Calls the service layer to get the children and their household members residing at the address.</p>
-     *
-     * <p>If no children are found at the given address, returns HTTP 204 No Content.</p>
-     *
-     * @param address the address to search for children
-     * @return a ResponseEntity containing:
-     *         - HTTP 200 OK and a list of ChildDTO if children are found,
-     *         - HTTP 204 No Content if no children live at the specified address
-     */
-    @GetMapping("/childAlert")
-    public ResponseEntity<List<ChildDTO>> getChildrenByAddress(@RequestParam String address){
-        log.info("Request received for /childAlert with address : {}", address);
-        List <ChildDTO> children = personService.getChildrenByAddress(address);
-
-        if(children.isEmpty()){
-            log.warn("No children found at this address {}:", address);
-            return ResponseEntity.noContent().build();
-        }
-        log.info("{} child(ren) found at address {}", children.size(), address);
-        return ResponseEntity.ok(children);
-    }
 }

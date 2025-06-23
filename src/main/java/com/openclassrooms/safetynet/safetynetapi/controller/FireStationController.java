@@ -1,7 +1,6 @@
 package com.openclassrooms.safetynet.safetynetapi.controller;
 
 import com.openclassrooms.safetynet.safetynetapi.dto.AddressResidentsDTO;
-import com.openclassrooms.safetynet.safetynetapi.dto.CoveredPersonsByStationDTO;
 import com.openclassrooms.safetynet.safetynetapi.dto.FireStationResidentsDTO;
 import com.openclassrooms.safetynet.safetynetapi.model.FireStation;
 import com.openclassrooms.safetynet.safetynetapi.service.FireStationService;
@@ -28,7 +27,7 @@ public class FireStationController {
      * - HTTP 204 No Content if no fire stations are found.
      */
     @GetMapping("/firestations")
-    public ResponseEntity<List<FireStation>> getFirestations() {
+    public ResponseEntity<List<FireStation>> getFireStations() {
         log.info("GET request received for all firestations");
 
         List<FireStation> fireStations = fireStationService.getAllFireStations();
@@ -52,8 +51,8 @@ public class FireStationController {
     @PostMapping("/firestation")
     public ResponseEntity<?> addFireStation(@RequestBody FireStation fireStation) {
 
-        FireStation saved = fireStationService.saveFirestation(fireStation);
-        log.info("Firestation at address '{}' with station number {} added successfully.",
+        FireStation saved = fireStationService.saveFireStation(fireStation);
+        log.info("FireStation at address '{}' with station number {} added successfully.",
                 fireStation.getAddress(), fireStation.getStation());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
 
@@ -72,8 +71,8 @@ public class FireStationController {
     @PutMapping("/firestation")
     public ResponseEntity<?> updateFireStation(@RequestBody FireStation fireStation) {
 
-        FireStation updated = fireStationService.updateFirestation(fireStation);
-        log.info("Firestation at address '{}' successfully updated to station number {}.",
+        FireStation updated = fireStationService.updateFireStation(fireStation);
+        log.info("FireStation at address '{}' successfully updated to station number {}.",
                 updated.getAddress(), updated.getStation());
         return ResponseEntity.ok(updated);
 
@@ -96,9 +95,9 @@ public class FireStationController {
     @DeleteMapping("/firestation")
     public ResponseEntity<String> deleteFireStation(@RequestParam String address) {
 
-        fireStationService.deleteFirestationByAddress(address);
-        log.info("Firestation at address '{}' deleted successfully.", address);
-        return ResponseEntity.ok("Firestation at address '" + address + "' deleted successfully.");
+        fireStationService.deleteFireStationByAddress(address);
+        log.info("FireStation at address '{}' deleted successfully.", address);
+        return ResponseEntity.ok("FireStation at address '" + address + "' deleted successfully.");
 
     }
 
@@ -119,90 +118,10 @@ public class FireStationController {
     @DeleteMapping("/firestations")
     public ResponseEntity<String> deleteFireStationsByStationNumber(@RequestParam int stationNumber) {
 
-        fireStationService.deleteFirestationsByStationNumber(stationNumber);
+        fireStationService.deleteFireStationsByStationNumber(stationNumber);
         log.info("All firestations with station number {} deleted successfully.", stationNumber);
         return ResponseEntity.ok("All firestations with station number " + stationNumber + " deleted successfully.");
 
-    }
-
-    /**
-     * Endpoint to retrieve a list of unique phone numbers of all persons covered by a specified fire station number.
-     *
-     * <p>Expects a query parameter "firestation" representing the station number.
-     * Calls the service layer to get the phone numbers associated with that station.
-     *
-     * @param stationNumber the fire station number provided as a query parameter "firestation"
-     * @return a ResponseEntity containing a list of unique phone numbers of persons covered by the fire station
-     */
-    @GetMapping("/phoneAlert")
-    public ResponseEntity<List<String>> getPhoneNumbersByStation(@RequestParam("firestation") int stationNumber) {
-
-        List<String> phoneNumbers = fireStationService.getPhoneNumbersByStation(stationNumber);
-        log.info("Retrieving the telephone numbers of people covered by station number {}", stationNumber);
-        log.debug("Number of phone numbers found: {}", phoneNumbers.size());
-        return ResponseEntity.ok(phoneNumbers);
-
-    }
-
-    /**
-     * GET endpoint that retrieves a list of persons covered by a given fire station number.
-     * <p>
-     * The response includes:
-     * <ul>
-     *     <li>Basic personal information (first name, last name, address, phone)</li>
-     *     <li>The number of adults and children among the listed persons</li>
-     * </ul>
-     *
-     * @param stationNumber the fire station number used to filter addresses and retrieve associated persons
-     * @return a ResponseEntity containing a CoveredPersonsByStationDTO with the list of persons and counts,
-     * or an appropriate HTTP error if no data is found
-     */
-    @GetMapping("/firestation")
-    public ResponseEntity<CoveredPersonsByStationDTO> getPersonsCoveredByStation(@RequestParam("stationNumber") int stationNumber) {
-        CoveredPersonsByStationDTO response = fireStationService.getPersonsCoveredByStation(stationNumber);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * GET endpoint that retrieves residents and medical information for a given address.
-     *
-     * <p>This endpoint returns:
-     * <ul>
-     *   <li>The fire station number serving the specified address</li>
-     *   <li>A list of residents living at that address, each including their name, phone number, age,
-     *       medications, and allergies</li>
-     * </ul>
-     *
-     * <p>Example request: <code>/fire?address=1509 Culver St</code></p>
-     * <p>If no fire station is found for the given address, this endpoint will respond with an appropriate HTTP error status.</p>
-     *
-     * @param address the address to look up
-     * @return a ResponseEntity containing a FireStationResidentsDTO with fire station number
-     * and resident details; returns HTTP 200 OK on success
-     */
-    @GetMapping("/fire")
-    public ResponseEntity<FireStationResidentsDTO> getResidentsByAddress(@RequestParam String address) {
-        FireStationResidentsDTO response = fireStationService.getResidentsByAddress(address);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Retrieves a list of households covered by the specified fire stations.
-     *
-     * <p>This endpoint is used in case of flooding to identify all households served by
-     * one or more fire stations. For each address, it returns the list of residents living
-     * there along with their personal and medical information (name, phone, age, medications, allergies).</p>
-     *
-     * <p>Example request: <code>/flood/stations?stations=1,2</code></p>
-     *
-     * @param stations the list of fire station numbers
-     * @return a ResponseEntity containing a list of AddressResidentsDTO,
-     *         each representing an address and its residents with medical details
-     */
-    @GetMapping("/flood/stations")
-    public ResponseEntity<List<AddressResidentsDTO>> getHouseholdsByStations(@RequestParam("stations") List<Integer> stations){
-        List<AddressResidentsDTO> response = fireStationService.getHouseholdsByStations(stations);
-        return ResponseEntity.ok(response);
     }
 
 }

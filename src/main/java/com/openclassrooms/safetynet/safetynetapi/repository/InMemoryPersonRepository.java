@@ -51,9 +51,9 @@ public class InMemoryPersonRepository implements PersonRepository {
      * @return List of Person objects
      */
     public List<Person> getPersonByAddress(String address) {
-
+        String trimmedAddress = address.trim().replaceAll("\\s+", " ");
         List<Person> persons = findAll().stream()
-                .filter(p -> p.getAddress().equalsIgnoreCase(address))
+                .filter(p -> p.getAddress().equalsIgnoreCase(trimmedAddress))
                 .toList();
         log.debug("{} persons with address {} found", persons.size(), address);
         return persons;
@@ -181,18 +181,7 @@ public class InMemoryPersonRepository implements PersonRepository {
         return null;
     }
 
-    /**
-     * Retrieves all persons living in the specified city.
-     *
-     * @param city the city name to filter by (case-insensitive)
-     * @return a list of persons residing in the given city; empty list if none found
-     */
-    @Override
-    public List<Person> findByCity(String city) {
-        return persons.stream()
-                .filter(person -> person.getCity().equalsIgnoreCase(city))
-                .collect(Collectors.toList());
-    }
+
 
     /**
      * Finds all persons whose last name matches the given lastName (case-insensitive).
@@ -202,8 +191,9 @@ public class InMemoryPersonRepository implements PersonRepository {
      */
     @Override
     public List<Person> findByLastName(String lastName) {
+        String trimmedLastName = lastName.trim().replaceAll("\\s+", " ");
         return persons.stream().
-                filter(person -> person.getLastName().equalsIgnoreCase(lastName))
+                filter(person -> person.getLastName().equalsIgnoreCase(trimmedLastName))
                 .collect(Collectors.toList());
     }
 
@@ -242,5 +232,19 @@ public class InMemoryPersonRepository implements PersonRepository {
         } else {
             log.debug("No person found for {} {}, deletion skipped", firstName, lastName);
         }
+    }
+
+    /**
+     * Retrieves all persons living in the specified city.
+     *
+     * @param city the city name to filter by (case-insensitive)
+     * @return a list of persons residing in the given city; empty list if none found
+     */
+    @Override
+    public List<Person> findByCity(String city) {
+        String trimmedCity = city.trim().replaceAll("\\s+", " ");
+        return persons.stream()
+                .filter(person -> person.getCity().equalsIgnoreCase(trimmedCity))
+                .collect(Collectors.toList());
     }
 }

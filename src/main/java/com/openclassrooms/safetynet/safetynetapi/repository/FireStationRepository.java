@@ -7,19 +7,19 @@ import java.util.List;
 
 @Repository
 public interface FireStationRepository {
-    List<FireStation> getFirestations();
+    List<FireStation> getFireStations();
 
-    List<FireStation> getFirestationByStationNumber(int station);
+    List<FireStation> getFireStationByStationNumber(int station);
 
-    FireStation getFirestationByAddress(String address);
+    FireStation getFireStationByAddress(String address);
 
-    void saveFirestation(FireStation fireStation);
+    void saveFireStation(FireStation fireStation);
 
-    FireStation updateFirestation(FireStation fireStation);
+    FireStation updateFireStation(FireStation fireStation);
 
-    boolean deleteFirstOccurrenceFirestationByAddress(String address);
+    boolean deleteFirstOccurrenceFireStationByAddress(String address);
 
-    boolean deleteAllFirestationByAddress(String address);
+    boolean deleteAllFireStationByAddress(String address);
 
     boolean deleteByStationNumber(int stationNumber);
 
