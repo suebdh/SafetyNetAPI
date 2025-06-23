@@ -89,4 +89,23 @@ public class AlertInfoController {
         log.info("{} child(ren) found at address {}", children.size(), address);
         return ResponseEntity.ok(children);
     }
+
+    /**
+     * Endpoint to retrieve a list of unique phone numbers of all persons covered by a specified fire station number.
+     *
+     * <p>Expects a query parameter "firestation" representing the station number.
+     * Calls the service layer to get the phone numbers associated with that station.
+     *
+     * @param stationNumber the fire station number provided as a query parameter "firestation"
+     * @return a ResponseEntity containing a list of unique phone numbers of persons covered by the fire station
+     */
+    @GetMapping("/phoneAlert")
+    public ResponseEntity<List<String>> getPhoneNumbersByStation(@RequestParam("firestation") int stationNumber) {
+
+        List<String> phoneNumbers = alertInfoService.getPhoneNumbersByStation(stationNumber);
+        log.info("Retrieving the telephone numbers of people covered by station number {}", stationNumber);
+        log.debug("Number of phone numbers found: {}", phoneNumbers.size());
+        return ResponseEntity.ok(phoneNumbers);
+
+    }
 }

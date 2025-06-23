@@ -173,52 +173,7 @@ public class FireStationService {
         }
     }
 
-    /**
-     * Retrieves a list of unique phone numbers for all persons covered by a given fire station number.
-     *
-     * <p>The method performs the following steps:
-     * <ol>
-     *   <li>Fetches all fire stations associated with the provided station number.</li>
-     *   <li>Extracts the addresses covered by these fire stations.</li>
-     *   <li>Retrieves all persons living at those addresses.</li>
-     *   <li>Extracts and returns a list of distinct phone numbers from these persons.</li>
-     * </ol>
-     *
-     * @param stationNumber the fire station number to search for
-     * @return a list of unique phone numbers of persons covered by the fire station
-     * @throws FireStationNotFoundException if no fire stations are found for the given station number
-     */
-    public List<String> getPhoneNumbersByStation(int stationNumber) {
-        // 1. Retrieve all fire stations with this station number
-        List<FireStation> fireStations = fireStationRepository.getFireStationByStationNumber(stationNumber);
-        if (fireStations.isEmpty()) {
-            throw new FireStationNotFoundException("Fire station(s) with station number" + stationNumber + " are not found.");
-        }
 
-        // 2. Extract the addresses of these fire stations
-        List<String> addresses = fireStations.stream()
-                .map(FireStation::getAddress)
-                .toList();
-
-        log.info("Station number {} covers {} addresses", stationNumber, addresses.size());
-
-        // 3. Retrieve all persons living at these addresses
-        List<Person> personsCovered = new ArrayList<>();
-        for (String address : addresses) {
-            personsCovered.addAll(personRepository.getPersonByAddress(address));
-        }
-        log.debug("Found {} persons covered by this station", personsCovered.size());
-
-
-        // 4. Extract unique phone numbers
-        List<String> phoneNumbers = personsCovered.stream()
-                .map(Person::getPhone)
-                .distinct()
-                .collect(Collectors.toList());
-
-        log.debug("Returning {} unique phone numbers", phoneNumbers.size());
-        return phoneNumbers;
-    }
 
     /**
      * Retrieves information about all persons covered by a given fire station number.
