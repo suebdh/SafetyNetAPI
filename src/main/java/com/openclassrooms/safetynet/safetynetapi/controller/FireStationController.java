@@ -1,7 +1,6 @@
 package com.openclassrooms.safetynet.safetynetapi.controller;
 
 import com.openclassrooms.safetynet.safetynetapi.dto.AddressResidentsDTO;
-import com.openclassrooms.safetynet.safetynetapi.dto.CoveredPersonsByStationDTO;
 import com.openclassrooms.safetynet.safetynetapi.dto.FireStationResidentsDTO;
 import com.openclassrooms.safetynet.safetynetapi.model.FireStation;
 import com.openclassrooms.safetynet.safetynetapi.service.FireStationService;
@@ -127,24 +126,7 @@ public class FireStationController {
 
 
 
-    /**
-     * GET endpoint that retrieves a list of persons covered by a given fire station number.
-     * <p>
-     * The response includes:
-     * <ul>
-     *     <li>Basic personal information (first name, last name, address, phone)</li>
-     *     <li>The number of adults and children among the listed persons</li>
-     * </ul>
-     *
-     * @param stationNumber the fire station number used to filter addresses and retrieve associated persons
-     * @return a ResponseEntity containing a CoveredPersonsByStationDTO with the list of persons and counts,
-     * or an appropriate HTTP error if no data is found
-     */
-    @GetMapping("/firestation")
-    public ResponseEntity<CoveredPersonsByStationDTO> getPersonsCoveredByStation(@RequestParam("stationNumber") int stationNumber) {
-        CoveredPersonsByStationDTO response = fireStationService.getPersonsCoveredByStation(stationNumber);
-        return ResponseEntity.ok(response);
-    }
+
 
     /**
      * GET endpoint that retrieves residents and medical information for a given address.
