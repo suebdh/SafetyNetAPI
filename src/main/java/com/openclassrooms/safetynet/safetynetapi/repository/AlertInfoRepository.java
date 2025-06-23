@@ -41,7 +41,7 @@ public class AlertInfoRepository implements  AlertInfoInterfaceRepository {
      */
     @Override
     public List<Person> findByCity(String city) {
-        String trimmedCity = city.trim();
+        String trimmedCity = city.trim().replaceAll("\\s+", " ");
         return persons.stream()
                 .filter(person -> person.getCity().equalsIgnoreCase(trimmedCity))
                 .collect(Collectors.toList());

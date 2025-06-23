@@ -51,9 +51,9 @@ public class InMemoryPersonRepository implements PersonRepository {
      * @return List of Person objects
      */
     public List<Person> getPersonByAddress(String address) {
-
+        String trimmedAddress = address.trim().replaceAll("\\s+", " ");
         List<Person> persons = findAll().stream()
-                .filter(p -> p.getAddress().equalsIgnoreCase(address))
+                .filter(p -> p.getAddress().equalsIgnoreCase(trimmedAddress))
                 .toList();
         log.debug("{} persons with address {} found", persons.size(), address);
         return persons;
@@ -191,7 +191,7 @@ public class InMemoryPersonRepository implements PersonRepository {
      */
     @Override
     public List<Person> findByLastName(String lastName) {
-        String trimmedLastName = lastName.trim();
+        String trimmedLastName = lastName.trim().replaceAll("\\s+", " ");
         return persons.stream().
                 filter(person -> person.getLastName().equalsIgnoreCase(trimmedLastName))
                 .collect(Collectors.toList());

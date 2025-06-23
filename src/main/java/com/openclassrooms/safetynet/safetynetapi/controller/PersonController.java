@@ -1,6 +1,5 @@
 package com.openclassrooms.safetynet.safetynetapi.controller;
 
-import com.openclassrooms.safetynet.safetynetapi.dto.ChildDTO;
 import com.openclassrooms.safetynet.safetynetapi.dto.PersonDTO;
 import com.openclassrooms.safetynet.safetynetapi.service.PersonService;
 import lombok.extern.log4j.Log4j2;
@@ -106,32 +105,4 @@ public class PersonController {
         return ResponseEntity.ok("Person " + firstName + " " + lastName + " deleted successfully.");
     }
 
-
-
-
-    /**
-     * Handles GET requests to retrieve a list of children living at a specified address.
-     *
-     * <p>Expects a query parameter "address" representing the address to search.
-     * Calls the service layer to get the children and their household members residing at the address.</p>
-     *
-     * <p>If no children are found at the given address, returns HTTP 204 No Content.</p>
-     *
-     * @param address the address to search for children
-     * @return a ResponseEntity containing:
-     *         - HTTP 200 OK and a list of ChildDTO if children are found,
-     *         - HTTP 204 No Content if no children live at the specified address
-     */
-    @GetMapping("/childAlert")
-    public ResponseEntity<List<ChildDTO>> getChildrenByAddress(@RequestParam String address){
-        log.info("Request received for /childAlert with address : {}", address);
-        List <ChildDTO> children = personService.getChildrenByAddress(address);
-
-        if(children.isEmpty()){
-            log.warn("No children found at this address {}:", address);
-            return ResponseEntity.noContent().build();
-        }
-        log.info("{} child(ren) found at address {}", children.size(), address);
-        return ResponseEntity.ok(children);
-    }
 }
