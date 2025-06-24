@@ -1,11 +1,13 @@
 package com.openclassrooms.safetynet.safetynetapi.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Data
 public class PersonDTO {
     private String firstName;

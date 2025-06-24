@@ -1,5 +1,6 @@
 package com.openclassrooms.safetynet.safetynetapi.repository;
 
+import com.openclassrooms.safetynet.safetynetapi.exception.MedicalRecordNotFoundException;
 import com.openclassrooms.safetynet.safetynetapi.model.MedicalRecord;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
@@ -108,36 +109,33 @@ public class InMemoryMedicalRecordRepository implements MedicalRecordRepository 
      * </p>
      *
      * @param medicalRecord the medical record containing updated information
-     * @return the updated MedicalRecord if found and updated; otherwise, returns null
+     * @return the updated MedicalRecord if found and updated
+     * @throws MedicalRecordNotFoundException if no medical record matches the given first and last name
      */
     @Override
     public MedicalRecord updateMedicalRecord(MedicalRecord medicalRecord) {
-        for (MedicalRecord mr : medicalRecords) {
-            if (mr.getFirstName().equalsIgnoreCase(medicalRecord.getFirstName())
-                    && mr.getLastName().equalsIgnoreCase(medicalRecord.getLastName())) {
+        MedicalRecord toUpdate = medicalRecords.stream()
+                .filter(mr ->
+                        mr.getFirstName().equalsIgnoreCase(medicalRecord.getFirstName()) &&
+                                mr.getLastName().equalsIgnoreCase(medicalRecord.getLastName()))
+                .limit(1)
+                .findFirst()
+                .orElseThrow(() -> new MedicalRecordNotFoundException("Medical record not found"));
 
-                mr.setBirthdate(medicalRecord.getBirthdate());
-                mr.setMedications(medicalRecord.getMedications());
-                mr.setAllergies(medicalRecord.getAllergies());
+        toUpdate.setBirthdate(medicalRecord.getBirthdate());
+        toUpdate.setMedications(medicalRecord.getMedications());
+        toUpdate.setAllergies(medicalRecord.getAllergies());
 
-                log.debug("Medical record for {} {} updated: birthdate={}, medications={}, allergies={}",
-                        mr.getFirstName(),
-                        mr.getLastName(),
-                        mr.getBirthdate(),
-                        mr.getMedications(),
-                        mr.getAllergies());
+        log.debug("Medical record for {} {} updated: birthdate={}, medications={}, allergies={}",
+                toUpdate.getFirstName(),
+                toUpdate.getLastName(),
+                toUpdate.getBirthdate(),
+                toUpdate.getMedications(),
+                toUpdate.getAllergies());
 
-                persistChanges();
+        persistChanges();
 
-                return mr;
-            }
-        }
-
-        log.debug("No medical record found for {} {}, update skipped",
-                medicalRecord.getFirstName(),
-                medicalRecord.getLastName());
-
-        return null;
+        return toUpdate;
     }
 
     /**
