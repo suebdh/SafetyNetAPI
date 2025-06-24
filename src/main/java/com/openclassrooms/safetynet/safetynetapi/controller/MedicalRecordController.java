@@ -43,7 +43,7 @@ public class MedicalRecordController {
      *
      * @return ResponseEntity containing the list of all MedicalRecordDTO objects with HTTP status 200 OK.
      */
-    @GetMapping("/medicalrecord")
+    @GetMapping("/medicalrecords")
     public ResponseEntity<List<MedicalRecordDTO>> getAllMedicalRecords() {
         log.info("GET request received for all medical records");
 

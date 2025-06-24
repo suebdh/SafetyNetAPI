@@ -1,5 +1,6 @@
 package com.openclassrooms.safetynet.safetynetapi.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 /**
@@ -15,5 +16,6 @@ import lombok.Data;
 @Data
 public class FireStation {
     private String address;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private int station;
 }

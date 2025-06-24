@@ -3,8 +3,10 @@ package com.openclassrooms.safetynet.safetynetapi.service;
 import com.openclassrooms.safetynet.safetynetapi.dto.MedicalRecordDTO;
 import com.openclassrooms.safetynet.safetynetapi.exception.MedicalRecordAlreadyExistsException;
 import com.openclassrooms.safetynet.safetynetapi.exception.MedicalRecordNotFoundException;
+import com.openclassrooms.safetynet.safetynetapi.exception.PersonNotFoundException;
 import com.openclassrooms.safetynet.safetynetapi.model.MedicalRecord;
 import com.openclassrooms.safetynet.safetynetapi.repository.MedicalRecordRepository;
+import com.openclassrooms.safetynet.safetynetapi.repository.PersonRepository;
 import com.openclassrooms.safetynet.safetynetapi.service.mapper.MedicalRecordMapper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,9 @@ public class MedicalRecordService {
 
     @Autowired
     private MedicalRecordMapper medicalRecordMapper;
+
+    @Autowired
+    private PersonRepository personRepository;
 
     /**
      * Retrieves all medical records from the repository.
@@ -64,7 +69,18 @@ public class MedicalRecordService {
         }
 
     }
-    
+
+    private boolean isMedicalRecodExists(MedicalRecordDTO medicalRecordDTO) {
+        MedicalRecord existing = medicalRecordRepository.getMedicalRecordByFirstNameAndLastName(
+                medicalRecordDTO.getFirstName(), medicalRecordDTO.getLastName());
+
+        return existing != null;
+
+    }
+
+    private boolean isPersonExists(String firstName, String lastName) {
+        return personRepository.findByFirstNameAndLastName(firstName, lastName) != null;
+    }
     /**
      * Saves a new medical record in the system.
      *
@@ -76,10 +92,12 @@ public class MedicalRecordService {
         log.info("Request received to save medical record for {} {}",
                 medicalRecordDTO.getFirstName(), medicalRecordDTO.getLastName());
 
-        MedicalRecord existing = medicalRecordRepository.getMedicalRecordByFirstNameAndLastName(
-                medicalRecordDTO.getFirstName(), medicalRecordDTO.getLastName());
+        if (!isPersonExists(medicalRecordDTO.getFirstName(), medicalRecordDTO.getLastName())) {
+            log.error("Person does not exist: {} {}", medicalRecordDTO.getFirstName(), medicalRecordDTO.getLastName());
+            throw new PersonNotFoundException("Person not found: " + medicalRecordDTO.getFirstName() + " " + medicalRecordDTO.getLastName());
+        }
 
-        if (existing != null) {
+        if (isMedicalRecodExists(medicalRecordDTO)) {
             log.error("Medical record already exists for {} {}",
                     medicalRecordDTO.getFirstName(), medicalRecordDTO.getLastName());
             throw new MedicalRecordAlreadyExistsException(
@@ -109,6 +127,14 @@ public class MedicalRecordService {
      */
     public MedicalRecordDTO  updateMedicalRecord(MedicalRecordDTO medicalRecordDTO) {
         log.info("Request received to update medical record for {} {}", medicalRecordDTO.getFirstName(), medicalRecordDTO.getLastName());
+
+        if (!isMedicalRecodExists(medicalRecordDTO)) {
+            log.error("Medical record does not exist for {} {}",
+                    medicalRecordDTO.getFirstName(), medicalRecordDTO.getLastName());
+            throw new MedicalRecordNotFoundException(
+                    "Medical does not exist for " +
+                            medicalRecordDTO.getFirstName() + " " + medicalRecordDTO.getLastName());
+        }
 
         MedicalRecord medicalRecordEntity = medicalRecordMapper.toEntity(medicalRecordDTO);
         MedicalRecord updated = medicalRecordRepository.updateMedicalRecord(medicalRecordEntity);

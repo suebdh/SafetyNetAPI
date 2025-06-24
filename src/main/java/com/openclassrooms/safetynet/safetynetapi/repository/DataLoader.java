@@ -99,4 +99,17 @@ public class DataLoader {
             throw new RuntimeException("Error saving json file: " + e.getMessage(), e);
         }
     }
+
+    /**
+     * Deletes the JSON data file at the specified path.
+     * <p>
+     * This method is intended for test purposes only, typically to reset the dataset
+     * before reloading fresh test data.
+     * </p>
+     */
+    public void dropJsonFile() {
+        File file = new File(dataFilePath);
+        file.delete();
+        log.info("Successfully dropped data to '{}'", dataFilePath);
+    }
 }
