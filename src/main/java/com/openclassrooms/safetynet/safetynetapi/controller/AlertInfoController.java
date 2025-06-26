@@ -81,12 +81,8 @@ public class AlertInfoController {
         log.info("Request received for /childAlert with address : {}", address);
         List <ChildDTO> children = alertInfoService.getChildrenByAddress(address);
 
-        if(children.isEmpty()){
-            log.warn("No children found at this address {}:", address);
-            return ResponseEntity.noContent().build();
-        }
         log.info("{} child(ren) found at address {}", children.size(), address);
-        return ResponseEntity.ok(children);
+        return ResponseEntity.ok(children); //  always status 200 Ok, even if no children found (empty list)
     }
 
     /**
