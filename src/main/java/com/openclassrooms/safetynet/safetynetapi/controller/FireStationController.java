@@ -1,7 +1,6 @@
 package com.openclassrooms.safetynet.safetynetapi.controller;
 
-import com.openclassrooms.safetynet.safetynetapi.dto.AddressResidentsDTO;
-import com.openclassrooms.safetynet.safetynetapi.dto.FireStationResidentsDTO;
+import com.openclassrooms.safetynet.safetynetapi.dto.FireStationDTO;
 import com.openclassrooms.safetynet.safetynetapi.model.FireStation;
 import com.openclassrooms.safetynet.safetynetapi.service.FireStationService;
 import lombok.extern.log4j.Log4j2;
@@ -27,54 +26,58 @@ public class FireStationController {
      * - HTTP 204 No Content if no fire stations are found.
      */
     @GetMapping("/firestations")
-    public ResponseEntity<List<FireStation>> getFireStations() {
+    public ResponseEntity<List<FireStationDTO>> getFireStations() {
         log.info("GET request received for all firestations");
 
-        List<FireStation> fireStations = fireStationService.getAllFireStations();
+        List<FireStationDTO> fireStationsDTOs = fireStationService.getAllFireStations();
 
-        if (fireStations.isEmpty()) {
+        if (fireStationsDTOs.isEmpty()) {
             log.info("No firestations found.");
             return ResponseEntity.noContent().build(); // 204 No Content
         }
 
-        log.info("Returning {} firestation(s)", fireStations.size());
-        return ResponseEntity.ok(fireStations);
+        log.info("Returning {} firestation(s)", fireStationsDTOs.size());
+        return ResponseEntity.ok(fireStationsDTOs);
     }
 
     /**
-     * Handles POST requests to add a new fire station.
+     * Handles HTTP POST requests to add a new fire station.
+     * <p>
+     * Receives a FireStationDTO object in the request body and delegates the creation to the service layer.
+     * Returns the created fire station data if the operation is successful.
+     * </p>
      *
-     * @param fireStation the FireStation object to be added
-     * @return ResponseEntity containing:
-     * - HTTP 201 Created and the saved FireStation object upon successful creation
+     * @param fireStationDTO the FireStationDTO object containing the fire station details to be added
+     * @return ResponseEntity with HTTP 201 (Created) and the saved FireStationDTO
      */
     @PostMapping("/firestation")
-    public ResponseEntity<?> addFireStation(@RequestBody FireStation fireStation) {
+    public ResponseEntity<FireStationDTO> addFireStation(@RequestBody FireStationDTO fireStationDTO) {
 
-        FireStation saved = fireStationService.saveFireStation(fireStation);
+        FireStationDTO savedDTO = fireStationService.saveFireStation(fireStationDTO);
         log.info("FireStation at address '{}' with station number {} added successfully.",
-                fireStation.getAddress(), fireStation.getStation());
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+                savedDTO.getAddress(), savedDTO.getStation());
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedDTO);
 
     }
 
     /**
-     * Updates the details of an existing fire station.
+     * Handles HTTP PUT requests to update an existing fire station.
      * <p>
-     * This method receives a FireStation object in the request body, attempts to update the corresponding fire station
-     * in the system, and returns the updated entity upon success.
+     * Accepts a FireStationDTO with updated data, delegates the update to the service layer,
+     * and returns the updated fire station.
+     * </p>
      *
-     * @param fireStation the FireStation object containing updated information
-     * @return ResponseEntity containing:
-     * - HTTP 200 OK and the updated FireStation object if the update is successful
+     * @param fireStationDTO the FireStationDTO containing updated fire station information
+     * @return ResponseEntity with HTTP 200 and the updated FireStationDTO
      */
     @PutMapping("/firestation")
-    public ResponseEntity<?> updateFireStation(@RequestBody FireStation fireStation) {
+    public ResponseEntity<FireStationDTO> updateFireStation(@RequestBody FireStationDTO fireStationDTO) {
 
-        FireStation updated = fireStationService.updateFireStation(fireStation);
+        FireStationDTO updatedDTO = fireStationService.updateFireStation(fireStationDTO);
         log.info("FireStation at address '{}' successfully updated to station number {}.",
-                updated.getAddress(), updated.getStation());
-        return ResponseEntity.ok(updated);
+                updatedDTO.getAddress(), updatedDTO.getStation());
+
+        return ResponseEntity.ok(updatedDTO);
 
     }
 
