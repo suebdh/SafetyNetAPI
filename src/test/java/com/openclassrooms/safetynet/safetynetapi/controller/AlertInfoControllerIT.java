@@ -184,10 +184,12 @@ public class AlertInfoControllerIT {
     }
 
     @Test
-    public void getChildrenByAddress_shouldReturnNoContent_whenNoChildrenFound() throws Exception {
+    public void getChildrenByAddress_shouldReturnEmptyList_whenNoChildrenFound() throws Exception {
         mockMvc.perform(get("/childAlert")
                         .param("address", "Unknown Address"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test
