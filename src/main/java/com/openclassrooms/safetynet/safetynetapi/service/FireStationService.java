@@ -4,12 +4,10 @@ import com.openclassrooms.safetynet.safetynetapi.dto.*;
 import com.openclassrooms.safetynet.safetynetapi.exception.FireStationAlreadyExistsException;
 import com.openclassrooms.safetynet.safetynetapi.exception.FireStationNotFoundException;
 import com.openclassrooms.safetynet.safetynetapi.model.FireStation;
-import com.openclassrooms.safetynet.safetynetapi.model.MedicalRecord;
-import com.openclassrooms.safetynet.safetynetapi.model.Person;
 import com.openclassrooms.safetynet.safetynetapi.repository.FireStationRepository;
 import com.openclassrooms.safetynet.safetynetapi.repository.MedicalRecordRepository;
 import com.openclassrooms.safetynet.safetynetapi.repository.PersonRepository;
-import com.openclassrooms.safetynet.safetynetapi.util.AgeUtil;
+import com.openclassrooms.safetynet.safetynetapi.service.mapper.FireStationMapper;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,94 +37,89 @@ public class FireStationService {
     @Autowired
     private MedicalRecordRepository medicalRecordRepository;
 
+    @Autowired
+    private FireStationMapper fireStationMapper;
+
+    /**
+     * Checks if a fire station exists at the given address.
+     * @param address The address to check.
+     * @return true if a fire station exists, false otherwise.
+     */
+    private boolean fireStationExists(String address) {
+        FireStation existing = fireStationRepository.getFireStationByAddress(address) ;
+        return existing != null;
+    }
+
     /**
      * Retrieves all fire stations from the repository.
      *
      * @return a list of all FireStation objects; the list may be empty if no fire stations are found.
      */
-    public List<FireStation> getAllFireStations() {
+    public List<FireStationDTO> getAllFireStations() {
         List<FireStation> fireStations = fireStationRepository.getFireStations();
         log.info("{} fire station(s) found", fireStations.size());
-        return fireStations;
-    }
-
-    /**
-     * Retrieves a fire station by its address.
-     * <p>
-     * This method searches for a fire station matching the provided address.
-     * If a fire station is found, it is returned; otherwise, a
-     * {@link FireStationNotFoundException} is thrown.
-     * </p>
-     *
-     * @param address the address of the fire station to retrieve
-     * @return the FireStation found at the specified address
-     * @throws FireStationNotFoundException if no fire station is found at the given address
-     */
-    public FireStation getFireStationByAddress(String address) {
-        log.info("Request received to find firestation by address: '{}'", address);
-
-        FireStation fireStation = fireStationRepository.getFireStationByAddress(address);
-
-        if (fireStation == null) {
-            log.error("No firestation found at address '{}'", address);
-            throw new FireStationNotFoundException("No firestation found at address: " + address);
-        }
-
-        log.info("FireStation found at address '{}'", address);
-        return fireStation;
-    }
-
-    /**
-     * Updates an existing fire station's information.
-     * <p>
-     * This method attempts to update the fire station associated with the given address.
-     * If no matching fire station is found, a FireStationNotFoundException is thrown.
-     *
-     * @param fireStation the FireStation object containing updated address and station number
-     * @return the updated FireStation object
-     * @throws FireStationNotFoundException if no fire station is found at the specified address
-     */
-    public FireStation updateFireStation(FireStation fireStation) {
-        log.info("Request received to update firestation at address '{}'", fireStation.getAddress());
-
-        FireStation fireStationToUpdate = fireStationRepository.updateFireStation(fireStation);
-
-        if (fireStationToUpdate == null) {
-            log.error("No firestation found at address '{}', cannot update", fireStation.getAddress());
-            throw new FireStationNotFoundException("No firestation found at address: " + fireStation.getAddress());
-        }
-
-        log.info("FireStation at address '{}' updated to station number {}", fireStationToUpdate.getAddress(), fireStationToUpdate.getStation());
-        return fireStationToUpdate;
+        return fireStationMapper.toDtoList(fireStations);
     }
 
     /**
      * Saves a new fire station to the system.
      * <p>
-     * This method stores the provided FireStation object if no fire station already exists at the specified address.
-     * If a fire station is already present, a FireStationAlreadyExistsException is thrown.
+     * Converts the given FireStationDTO to an entity and persists it if no fire station
+     * already exists at the specified address.
+     * Throws a FireStationAlreadyExistsException if a fire station is already registered at that address.
+     * </p>
      *
-     * @param fireStation the FireStation object to be saved
-     * @return the saved FireStation object
+     * @param fireStationDTO the FireStationDTO containing the address and station number to be saved
+     * @return the saved FireStationDTO
      * @throws FireStationAlreadyExistsException if a fire station already exists at the given address
      */
-    public FireStation saveFireStation(FireStation fireStation) {
+    public FireStationDTO saveFireStation(FireStationDTO fireStationDTO) {
         log.info("Request received to save firestation at address '{}' with station number {}",
-                fireStation.getAddress(), fireStation.getStation());
+                fireStationDTO.getAddress(), fireStationDTO.getStation());
 
-        FireStation existing = fireStationRepository.getFireStationByAddress(fireStation.getAddress());
-
-        if (existing != null) {
-            log.error("FireStation already exists at address '{}'", fireStation.getAddress());
-            throw new FireStationAlreadyExistsException("FireStation already exists at address: " + fireStation.getAddress());
+        if (fireStationExists(fireStationDTO.getAddress())) {
+            log.error("FireStation already exists at address '{}'", fireStationDTO.getAddress());
+            throw new FireStationAlreadyExistsException("FireStation already exists at address: " + fireStationDTO.getAddress());
         }
 
+        // Conversion DTO → Entity
+        FireStation fireStation = fireStationMapper.toEntity(fireStationDTO);
+        // Persistence
         fireStationRepository.saveFireStation(fireStation);
 
         log.info("FireStation saved successfully at address '{}' with station number {}",
                 fireStation.getAddress(), fireStation.getStation());
 
-        return fireStation;
+        return fireStationMapper.toDTO(fireStation);
+    }
+
+    /**
+     * Updates the information of an existing fire station.
+     * <p>
+     * Searches for a fire station by address and updates its station number if found.
+     * If no fire station exists at the given address, a FireStationNotFoundException is thrown.
+     * </p>
+     *
+     * @param fireStationDTO the FireStation DTO object with the updated data
+     * @return the updated FireStation entity
+     * @throws FireStationNotFoundException if no fire station exists at the specified address
+     */
+
+    public FireStationDTO updateFireStation(FireStationDTO fireStationDTO) {
+        log.info("Request received to update firestation at address '{}'", fireStationDTO.getAddress());
+
+        if (!fireStationExists(fireStationDTO.getAddress())) {
+
+            log.error("No firestation found at address '{}', cannot update", fireStationDTO.getAddress());
+            throw new FireStationNotFoundException("No firestation found at address: " + fireStationDTO.getAddress());
+        }
+        // Conversion DTO → Entity
+        FireStation fireStation = fireStationMapper.toEntity(fireStationDTO);
+        // Persistence
+        FireStation updated = fireStationRepository.updateFireStation(fireStation);
+
+        log.info("FireStation at address '{}' updated to station number {}", updated.getAddress(), updated.getStation());
+        return fireStationMapper.toDTO(updated);
     }
 
     /**
