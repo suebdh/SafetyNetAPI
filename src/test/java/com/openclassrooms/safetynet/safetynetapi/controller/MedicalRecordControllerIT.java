@@ -66,6 +66,23 @@ public class MedicalRecordControllerIT {
     }
 
     @Test
+    public void getMedicalRecord_shouldReturnRecord_whenFound() throws Exception {
+        // Arrange — données présentes en base ou mockées via un import de dataset
+        String firstName = "Tenley";
+        String lastName = "Boyd";
+
+        // Act & Assert — exécute la requête et vérifie le contenu de la réponse JSON
+        mockMvc.perform(get("/medicalrecord")
+                        .param("firstName", firstName)
+                        .param("lastName", lastName))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value(firstName))
+                .andExpect(jsonPath("$.lastName").value(lastName))
+                .andExpect(jsonPath("$.medications").isArray())
+                .andExpect(jsonPath("$.allergies").isArray());
+    }
+
+    @Test
     void givenValidPerson_whenAddMedicalRecord_thenReturnCreated() throws Exception {
 
         // GIVEN: First create a person in the system

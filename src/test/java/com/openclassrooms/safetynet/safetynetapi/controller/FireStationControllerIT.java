@@ -15,8 +15,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Test class for the MedicalRecordController.
- * This class tests all the endpoints related to medical records, ensuring that each endpoint
+ * Test class for the FireStationController
+ * This class tests all the endpoints related to fire stations, ensuring that each endpoint
  * behaves as expected by verifying the status code and the returned JSON data.
  */
 @SpringBootTest

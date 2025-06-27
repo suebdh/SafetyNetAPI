@@ -55,6 +55,18 @@ public class MedicalRecordController {
     }
 
     /**
+     * GET /medicalrecord?firstName=X&lastName=Y
+     */
+    @GetMapping("/medicalrecord")
+    public ResponseEntity<MedicalRecordDTO> getMedicalRecord(
+            @RequestParam String firstName,
+            @RequestParam String lastName) {
+
+        MedicalRecordDTO dto = medicalRecordService.getMedicalRecordByFirstNameAndLastName(firstName, lastName);
+        return ResponseEntity.ok(dto);
+    }
+
+    /**
      * Adds a new medical record to the system.
      *
      * <p>This method delegates the creation of the medical record to the MedicalRecordService.

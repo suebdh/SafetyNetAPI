@@ -31,11 +31,6 @@ public class FireStationController {
 
         List<FireStationDTO> fireStationsDTOs = fireStationService.getAllFireStations();
 
-        if (fireStationsDTOs.isEmpty()) {
-            log.info("No firestations found.");
-            return ResponseEntity.noContent().build(); // 204 No Content
-        }
-
         log.info("Returning {} firestation(s)", fireStationsDTOs.size());
         return ResponseEntity.ok(fireStationsDTOs);
     }
