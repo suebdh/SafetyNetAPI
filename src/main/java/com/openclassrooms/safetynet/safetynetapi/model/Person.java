@@ -1,6 +1,7 @@
 package com.openclassrooms.safetynet.safetynetapi.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Represents a person with personal and contact details.
@@ -13,7 +14,8 @@ import lombok.Data;
  *
  * @author [Sarar]
  */
-@Data
+@Getter
+@Setter
 public class Person {
     private String firstName;
     private String lastName;

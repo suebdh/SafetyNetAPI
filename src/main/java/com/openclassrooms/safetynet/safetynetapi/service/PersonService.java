@@ -27,16 +27,12 @@ import java.util.stream.Collectors;
  */
 @Log4j2
 @Service
-@Data
 public class PersonService {
     @Autowired
     private PersonRepository personRepository;
 
     @Autowired
     private PersonMapper personMapper;
-
-    @Autowired
-    private MedicalRecordRepository medicalRecordRepository;
 
     /**
      * Retrieves all persons from the repository.

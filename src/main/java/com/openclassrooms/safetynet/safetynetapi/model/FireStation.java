@@ -2,7 +2,8 @@ package com.openclassrooms.safetynet.safetynetapi.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Represents a firestation mapping an address to a station number.
@@ -14,7 +15,8 @@ import lombok.Data;
  *
  * @author [Sarar]
  */
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 public class FireStation {
     private String address;
