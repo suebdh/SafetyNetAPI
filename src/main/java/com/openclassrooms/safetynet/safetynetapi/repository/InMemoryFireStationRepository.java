@@ -153,31 +153,6 @@ public class InMemoryFireStationRepository implements FireStationRepository {
     }
 
     /**
-     * Deletes all fire stations matching the specified address.
-     * <p>
-     * If any fire stations with the given address are found, they are removed from the in-memory list,
-     * the data file is updated, and the changes are saved to the JSON file.
-     * </p>
-     *
-     * @param address the address of the fire stations to delete
-     * @return true if one or more fire stations were found and deleted; false otherwise
-     */
-    @Override
-    public boolean deleteAllFireStationByAddress(String address) {
-        boolean removed = fireStations.removeIf(fs -> fs.getAddress().equalsIgnoreCase(address));
-        if (removed) {
-            log.debug("All firestations with address '{}' deleted", address);
-
-            // Update source DataFile and save JSON
-            dataLoader.getDataFile().setFireStations(fireStations);
-            dataLoader.saveJsonFile();
-        } else {
-            log.debug("No firestation at all found with address '{}', nothing deleted", address);
-        }
-        return removed;
-    }
-
-    /**
      * Deletes all fire stations matching the specified station number.
      * <p>
      * If any fire stations with the given station number are found, they are removed from the in-memory list,

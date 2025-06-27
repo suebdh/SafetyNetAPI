@@ -19,8 +19,6 @@ public interface FireStationRepository {
 
     boolean deleteFirstOccurrenceFireStationByAddress(String address);
 
-    boolean deleteAllFireStationByAddress(String address);
-
     boolean deleteByStationNumber(int stationNumber);
 
     List<String> getAddressesByStation(Integer stationNumber);

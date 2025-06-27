@@ -3,7 +3,7 @@ package com.openclassrooms.safetynet.safetynetapi.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @author Sarar
  */
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

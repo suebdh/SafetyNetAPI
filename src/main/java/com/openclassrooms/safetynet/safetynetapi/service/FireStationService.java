@@ -5,10 +5,7 @@ import com.openclassrooms.safetynet.safetynetapi.exception.FireStationAlreadyExi
 import com.openclassrooms.safetynet.safetynetapi.exception.FireStationNotFoundException;
 import com.openclassrooms.safetynet.safetynetapi.model.FireStation;
 import com.openclassrooms.safetynet.safetynetapi.repository.FireStationRepository;
-import com.openclassrooms.safetynet.safetynetapi.repository.MedicalRecordRepository;
-import com.openclassrooms.safetynet.safetynetapi.repository.PersonRepository;
 import com.openclassrooms.safetynet.safetynetapi.service.mapper.FireStationMapper;
-import lombok.Data;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,17 +22,10 @@ import java.util.*;
  */
 @Log4j2
 @Service
-@Data
 public class FireStationService {
 
     @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
     private FireStationRepository fireStationRepository;
-
-    @Autowired
-    private MedicalRecordRepository medicalRecordRepository;
 
     @Autowired
     private FireStationMapper fireStationMapper;

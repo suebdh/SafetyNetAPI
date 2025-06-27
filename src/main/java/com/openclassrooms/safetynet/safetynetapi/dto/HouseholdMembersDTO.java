@@ -1,8 +1,10 @@
 package com.openclassrooms.safetynet.safetynetapi.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class HouseholdMembersDTO {
     private String firstName;
     private String lastName;
