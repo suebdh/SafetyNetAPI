@@ -61,3 +61,6 @@ Desktop.ini
 # Backup and swap files
 *.bak
 *.orig
+
+# files generated for tests
+src/test/resources/generated/
