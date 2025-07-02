@@ -1,10 +1,7 @@
 package com.openclassrooms.safetynet.safetynetapi.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * Data Transfer Object (DTO) representing the mapping between a fire station number and its corresponding address.
@@ -20,6 +17,7 @@ import lombok.NoArgsConstructor;
  * @author Sarar
  */
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
