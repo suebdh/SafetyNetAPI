@@ -6,83 +6,126 @@ Backend API for SafetyNet Alerts application, developed as part of the OpenClass
 - [Description](#description)
 - [Tech Stack](#tech-stack)
 - [Usage](#usage)
+- [Testing](#testing)
 - [Base URL](#base-url)
 - [API Endpoints](#api-endpoints)
-    - [/persons](#persons)
-    - [/firestations](#firestations)
-    - [/medicalrecords](#medicalrecords)
-    - [/addresses](#addresses) 
+    - [Person endpoints](#person-endpoints)
+    - [FireStation endpoints](#firestation-endpoints)
+    - [MedicalRecord endpoints](#medicalrecord-endpoints)
+    - [Specific Alert and Information Requests](#specific-alert-and-information-requests)
+
 ## Description
 
-**SafetyNetAPI** is a REST API implemented with Spring Boot, designed to provide emergency services with relevant information about individuals in distress and their locations.
-This application reads and stores data in a JSON file and exposes endpoints to retrieve and update this information.
+**SafetyNetAPI** is a REST API implemented with Spring Boot, designed to provide emergency services with relevant information about individuals in distress and their locations.  
+This application reads and stores data in a JSON file and exposes endpoints to retrieve and update this information.  
 Its primary goal is to send crucial data to emergency service systems efficiently.
 
 ## Tech Stack
 
-- Java 11+
+- Java 21
 - Spring Boot
-- Maven (preferred, but Gradle is also possible)
+- Maven
 - Git for version control
-- Java library for JSON parsing (e.g., Jackson)
+- Jackson : Java library for JSON parsing
+- Integration tests with Spring Test (`@SpringBootTest`, `@AutoConfigureMockMvc`, `MockMvc` with `@Autowired`)
 - Unit testing with JUnit
 - Code coverage measured with JaCoCo
-- Logging (execution traces) with Log4j
+- Logging (execution traces) with Log4j2
 
 ## Usage
 
 - Clone the repository
 - Build with Maven: `mvn clean install`
-- Run the application
+- Run the application: `mvn spring-boot:run`
 
+## Testing
+
+- Run unit and integration tests with Maven: `mvn test`
+- Run unit and integration tests with Maven: `mvn verify`
+- View code coverage report in `target/site/jacoco/index.html`
 
 ## Base URL
-http://localhost:8080
+`http://localhost:8080`
 
 ## API Endpoints
 
-### /persons
-- `GET /persons?lastName=<lastName>`
-  Returns the name, address, age, email, and medical records for each person with the specified last name. Multiple persons with the same last name will all be listed.
-- `GET /emails?city=<city>`
-  Returns the email addresses of all residents in the specified city.
-  *Replace `<city>` with the city name. If the city name contains spaces, encode them as `%20` or use `+`. For example, `New%20York` or `New+York`.*
-- `POST /persons`
-   Adds a new person
-- `PUT /persons/{firstName}-{lastName}`
-   Updates an existing person (assumes first and last names do not change, other fields can)
-- `DELETE /persons/{firstName}-{lastName}`  
-   Deletes a person (unique identifier is first name + last name)
+**Note:**
+- For `/person` and `/medicalrecord`, the unique identifier is the combination of `firstName` and `lastName`.
+- For `/firestation`, the unique identifier is the `address`.
 
-### /firestations
-- `GET /firestations/{firestationId}/residents`
-  Returns a list of people covered by the specified fire station number. The response includes first name, last name, address, phone number, and a count of adults and children (18 years or younger) in the area.
-  *Replace `{firestationId}` with the fire station number (e.g., 1, 2, 3)*
-- `GET /firestations/{firestationId}/phones`
-  Returns a list of phone numbers of residents covered by the specified fire station, used for sending emergency text messages.
-- `GET /stations/flood?ids=1,2,3`
-  Returns a list of households served by the specified fire stations, grouped by address. For each person, includes name, phone number, age, and medical records.
-  *Query parameter `ids` with a comma-separated list of fire station numbers*
-- `POST /firestations` 
-   Adds a new address-to-firestation mapping. The request body should include the address and fire station number.
-- `PUT /firestations/{address}` 
-   Updates the fire station number for the specified address.
-- `DELETE /firestations/{address}`
-   Deletes the mapping for the specified address.
+---
 
-### /medicalrecords
-- `POST /medicalrecords`
-   Adds a new medical record. The request body must include all necessary details along with the person's first and last name.
-- `PUT /medicalrecords/{firstName}-{lastName}`
-   Updates an existing medical record identified by first and last name.
-- `DELETE /medicalrecords/{firstName}-{lastName}`
-   Deletes the medical record identified by first and last name.
+### Person endpoints
 
-### /addresses
-- `GET /addresses/{address}/children`
-  Returns a list of children (18 years or younger) living at the given address, including their first name, last name, age, and a list of other household members. Returns an empty string if no children are found.
-- `GET /addresses/{address}/residents`
-  Returns a list of residents at the given address along with the fire station number serving that address. Includes name, phone number, age, and medical records (medications, dosages, allergies).
+#### /persons
+- `GET /persons`  
+  Retrieves a list of all persons in the system, including their details.
 
+#### /person
+- `GET /person?firstName=<firstName>&lastName=<lastName>`  
+  Retrieves a single person identified by `firstName` and `lastName`.
 
+- `POST /person`  
+  Adds a new person. Requires all necessary fields such as `firstName`, `lastName`, `address`, `email`, `phone`, etc.
 
+- `PUT /person`  
+  Updates an existing person. The person to update is identified by the `firstName` and `lastName` fields in the request body. Other fields can be modified.
+
+- `DELETE /person?firstName=<firstName>&lastName=<lastName>`  
+  Deletes the person identified by `firstName` and `lastName` provided as query parameters.
+
+---
+
+### FireStation endpoints
+
+#### /firestations
+- `GET /firestations`  
+  Retrieves a list of all fire stations.
+
+- `DELETE /firestations?stationNumber=<stationNumber>`  
+  Deletes all fire stations associated with the given `stationNumber`.
+
+#### /firestation
+- `POST /firestation`  
+  Adds a new fire station mapping. Requires fields: `address` and `station` in the request body.
+
+- `PUT /firestation`  
+  Updates an existing fire station mapping. Requires the full fire station object (including `address`) in the request body.
+
+- `DELETE /firestation?address=<address>`  
+  Deletes the fire station mapping for the specified `address`.
+
+---
+
+### MedicalRecord endpoints
+
+#### /medicalrecords
+- `GET /medicalrecords`  
+  Retrieves a list of all medical records.
+
+#### /medicalrecord
+- `GET /medicalrecord?firstName=<firstName>&lastName=<lastName>`  
+  Retrieves the medical record for the specified `firstName` and `lastName`.
+
+- `POST /medicalrecord`  
+  Adds a new medical record. Requires fields such as `firstName`, `lastName`, `birthdate`, `medications`, `allergies`, etc. in the request body.
+
+- `PUT /medicalrecord`  
+  Updates an existing medical record. Requires the full medical record DTO in the request body.
+
+- `DELETE /medicalrecord?firstName=<firstName>&lastName=<lastName>`  
+  Deletes the medical record identified by `firstName` and `lastName`.
+
+### Specific Alert and Information Requests
+
+These endpoints provide specific queries to retrieve alert-related or aggregated information useful for emergency services.
+
+| Method | URL               | Parameters                     | Description & Details                                                                                        |
+|--------|-------------------|--------------------------------|--------------------------------------------------------------------------------------------------------------|
+| GET    | `/communityEmail` | `city`                         | Retrieves all email addresses of persons living in the specified city. Returns 204 No Content if none found. |
+| GET    | `/personInfo`     | `lastName`                     | Retrieves detailed personal info for persons matching the last name. Returns 404 if no matches.              |
+| GET    | `/childAlert`     | `address`                      | Lists children and household members living at the given address. Always returns 200 OK, even if empty.      |
+| GET    | `/phoneAlert`     | `firestation` (station number) | Returns unique phone numbers of persons covered by the fire station.                                         |
+| GET    | `/firestation`    | `stationNumber`                | Retrieves persons covered by the fire station, including counts of adults and children.                      |
+| GET    | `/fire`           | `address`                      | Provides residents at the address with age, phone, medications, allergies, and the fire station number.      |
+| GET    | `/flood/stations` | `stations` (list of numbers)   | Returns households served by given fire stations, including personal and medical details of residents.       |
