@@ -40,9 +40,18 @@ Its primary goal is to send crucial data to emergency service systems efficientl
 
 ## Testing
 
-- Run unit and integration tests with Maven: `mvn test`
-- Run unit and integration tests with Maven: `mvn verify`
-- View code coverage report in `target/site/jacoco/index.html`
+- Run unit and integration tests:  
+  `mvn test`
+
+- Run full verification phase (includes tests, checks, and coverage):  
+  `mvn verify`
+
+- Generate an HTML test report (Surefire):  
+  `mvn surefire-report:report`  
+  → Open `target/reports/surefire.html` in a browser
+
+- View code coverage report (JaCoCo):  
+  → Open `target/site/jacoco/index.html` in a browser
 
 ## Base URL
 `http://localhost:8080`
@@ -115,6 +124,8 @@ Its primary goal is to send crucial data to emergency service systems efficientl
 
 - `DELETE /medicalrecord?firstName=<firstName>&lastName=<lastName>`  
   Deletes the medical record identified by `firstName` and `lastName`.
+
+---
 
 ### Specific Alert and Information Requests
 
