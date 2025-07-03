@@ -101,7 +101,7 @@ public class AlertInfoService {
         List<Person> personsAtAddress = personRepository.getPersonByAddress(address);
 
         if (personsAtAddress.isEmpty()) {
-            log.warn("No residents found at address {}", address);
+            log.warn("[getChildrenByAddress] No residents found at address {}", address);
             return Collections.emptyList();
         }
         // 2- For each person:
@@ -112,7 +112,7 @@ public class AlertInfoService {
         for (Person person : personsAtAddress) {
             MedicalRecord record = medicalRecordRepository.getMedicalRecordByFirstNameAndLastName(person.getFirstName(), person.getLastName());
             if (record == null) {
-                log.warn("No medical record found for {} {}", person.getFirstName(), person.getLastName());
+                log.warn("[getChildrenByAddress] No medical record found for {} {}", person.getFirstName(), person.getLastName());
                 continue;
             } // No medical record → skip
             int age = AgeUtil.calculateAge(record.getBirthdate());
@@ -215,7 +215,7 @@ public class AlertInfoService {
                 .toList();
 
         if (addresses.isEmpty()) {
-            log.warn("No addresses found for station number: {}", stationNumber);
+            log.warn("[getPersonsCoveredByStation] No addresses found for station number: {}", stationNumber);
             throw new FireStationNotFoundException("No addresses found for station number: " + stationNumber);
         }
 
@@ -235,7 +235,7 @@ public class AlertInfoService {
             MedicalRecord record = medicalRecordRepository.getMedicalRecordByFirstNameAndLastName(person.getFirstName(), person.getLastName());
 
             if (record == null) {
-                log.warn("No medical record found for {} {}", person.getFirstName(), person.getLastName());
+                log.warn("[getPersonsCoveredByStation] No medical record found for {} {}", person.getFirstName(), person.getLastName());
                 continue; // Skip person if no medical record
             }
             int age = AgeUtil.calculateAge(record.getBirthdate());
@@ -264,7 +264,7 @@ public class AlertInfoService {
         return responseDTO;
     }
 
-    private FirePersonInfoDTO buildFirePersonInfoDTO(Person person){
+    protected FirePersonInfoDTO buildFirePersonInfoDTO(Person person){
         MedicalRecord medicalRecord = medicalRecordRepository.getMedicalRecordByFirstNameAndLastName(person.getFirstName(), person.getLastName());
 
         int age = -1;
@@ -276,7 +276,7 @@ public class AlertInfoService {
             medications = medicalRecord.getMedications();
             allergies = medicalRecord.getAllergies();
         } else {
-            log.warn("No medical record found for1 {} {}", person.getFirstName(), person.getLastName());
+            log.warn("[buildFirePersonInfoDTO] No medical record found for {} {}", person.getFirstName(), person.getLastName());
         }
 
         FirePersonInfoDTO infoDto = new FirePersonInfoDTO(
@@ -311,7 +311,7 @@ public class AlertInfoService {
         //1 - Find the fire station using the address
         FireStation fireStation = fireStationRepository.getFireStationByAddress(address);
         if (fireStation == null) {
-            log.warn("No fire station found for address {}", address);
+            log.warn("[getResidentsByAddress] No fire station found for address {}", address);
             throw new FireStationNotFoundException("No fire station found for address: " + address);
         }
 
@@ -322,10 +322,10 @@ public class AlertInfoService {
         log.info("{} resident(s) found at address {}", residents.size(), address);
 
         if (residents.isEmpty()) {
-            log.warn("No residents found at address {}", address);
+            log.warn("[getResidentsByAddress] No residents found at address {}", address);
             // Option 1: Return a DTO with an empty list
             return new FireStationResidentsDTO(stationNumber, Collections.emptyList());
-            // Option 2:  throw new PersonNotFoundException("No residents found at address: " + address);
+            // Option 2:  throw new PersonNotFoundException("[getResidentsByAddress] No residents found at address: " + address);
         }
 
         //3 - Build the detailed list of residents
