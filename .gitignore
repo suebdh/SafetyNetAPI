@@ -64,3 +64,4 @@ Desktop.ini
 
 # files generated for tests
 src/test/resources/generated/
+./data/
